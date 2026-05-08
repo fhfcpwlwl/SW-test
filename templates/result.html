@@ -43,6 +43,13 @@
                         <strong>{{ result.analysis.age }} / {{ result.analysis.gender }}</strong>
                         <p>예상 연령과 성별 추정 결과</p>
                     </div>
+                    {% if result.analysis.pytorch_predicted_class %}
+                    <div class="snapshot-card">
+                        <span class="snapshot-label">외부 모델</span>
+                        <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
+                        <p>신뢰도 {{ result.analysis.pytorch_confidence }}%</p>
+                    </div>
+                    {% endif %}
                 </div>
             </article>
 
@@ -73,7 +80,7 @@
         <section class="report-grid">
             <article class="report-card report-card-wide">
                 <div class="report-card-head">
-                    <h2>핵심 관리 코멘트</h2>
+                    <h2>맞춤 관리 코멘트</h2>
                     <span class="badge-pill">먼저 확인할 내용</span>
                 </div>
                 <div class="advice-stream">
@@ -121,7 +128,7 @@
                     </div>
                     <div class="metric-score">{{ card.score }}</div>
                     <p>{{ card.description }}</p>
-                    <div class="focus-line">집중 부위: {{ card.focus_area }}</div>
+                    <div class="focus-line">집중 부위 {{ card.focus_area }}</div>
                 </article>
                 {% endfor %}
             </div>
@@ -131,7 +138,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>아침 루틴</h2>
-                    <span class="badge-pill">오전 관리</span>
+                    <span class="badge-pill">낮 시간 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.morning %}
@@ -143,7 +150,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>저녁 루틴</h2>
-                    <span class="badge-pill">저녁 관리</span>
+                    <span class="badge-pill">밤 시간 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.evening %}
