@@ -511,8 +511,8 @@ def build_pytorch_condition_cards(analysis: Dict[str, Any]) -> List[Dict[str, An
                 "label": label,
                 "score": score_value,
                 "level": score_to_level(score_value),
-                "focus_area": "외부 .pth AI 분류 결과",
-                "description": f"외부 PyTorch 모델이 이 클래스로 판단한 확률입니다. 현재 점수는 {score_value}점입니다.",
+                "focus_area": "AI 분석 결과",
+                "description": f"AI가 이 클래스로 판단한 확률입니다. 현재 점수는 {score_value}점입니다.",
             }
         )
     return cards
@@ -556,8 +556,8 @@ def build_pytorch_advice(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) ->
     code = skin_mbti.get("code", "????")
 
     advice = [
-        f"외부 AI 모델은 이번 사진을 {predicted_class} 패턴으로 {confidence}% 신뢰도로 분류했습니다.",
-        "이 결과는 .pth 기반 분류 결과이며, 기존 규칙 기반 피부 점수는 사용하지 않았습니다.",
+        f"AI 분석 결과 이번 사진은 {predicted_class} 패턴으로 {confidence}% 신뢰도로 분류되었습니다.",
+        "결과는 사진 분석과 설문 응답을 바탕으로 정리되었습니다.",
     ]
 
     if confidence < 60:
@@ -590,7 +590,7 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
         overall_level = "재촬영 권장"
 
     summary = (
-        f"외부 .pth AI 모델이 이번 사진을 {predicted_class} 클래스로 분류했습니다. "
+        f"AI가 이번 사진을 {predicted_class} 클래스로 분류했습니다. "
         f"현재 신뢰도는 {confidence}점이며, 설문 코드 {skin_mbti.get('code', '????')}를 함께 반영해 루틴을 구성했습니다."
     )
 
@@ -602,5 +602,5 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
         "condition_cards": cards,
         "product_recommendations": products,
         "routine": build_pytorch_routine(products),
-        "disclaimer": "이 결과는 외부 .pth 분류 모델과 설문 응답을 기반으로 한 참고용 안내입니다.",
+        "disclaimer": "이 결과는 사진 분석과 설문 응답을 바탕으로 한 참고용 안내입니다.",
     }

@@ -1,4 +1,4 @@
-"""FastAPI backend for .pth-based skin analysis."""
+"""FastAPI backend for AI-based skin analysis."""
 from pathlib import Path
 from typing import Optional
 
@@ -53,7 +53,7 @@ def root() -> dict:
     return {
         "message": "Skin Analysis API v2.1",
         "status": "running",
-        "analysis_model": "pytorch",
+        "analysis_model": "ai",
         "endpoints": {
             "health": "/health",
             "analyze": "/analyze-skin",
@@ -66,8 +66,8 @@ def health_check() -> dict:
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "analysis_model": "pytorch",
-        "pytorch_model_loaded": pytorch_model_bundle is not None,
+        "analysis_model": "ai",
+        "model_loaded": pytorch_model_bundle is not None,
         "version": "2.1.0",
     }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin Lab 결과</title>
+    <title>Skin Lab 분석 결과</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="theme-report">
@@ -13,7 +13,7 @@
                 <span class="brand-orb"></span>
                 <span class="brand-copy">
                     <strong>Skin Lab</strong>
-                    <span>AI 피부 리포트</span>
+                    <span>AI 피부 분석</span>
                 </span>
             </a>
             <a href="/" class="ghost-link">새 분석</a>
@@ -23,7 +23,7 @@
             <article class="hero-stage hero-stage-report">
                 <div class="hero-copy">
                     <span class="eyebrow">분석 결과</span>
-                    <h1>{{ result.skin_mbti.code }} 리포트</h1>
+                    <h1>{{ result.skin_mbti.code }} 분석 결과</h1>
                     <p class="hero-text">{{ result.report.summary }}</p>
                 </div>
 
@@ -99,7 +99,7 @@
         <section class="report-card">
             <div class="report-card-head">
                 <h2>클래스별 AI 점수</h2>
-                <span class="badge-pill">.pth 분류 결과</span>
+                <span class="badge-pill">AI 분석 결과</span>
             </div>
             <div class="metric-grid metric-grid-readable">
                 {% for card in result.report.condition_cards %}

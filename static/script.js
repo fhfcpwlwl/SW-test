@@ -79,7 +79,7 @@ optionCards.forEach((card) => {
 if (analysisForm && submitButton) {
     analysisForm.addEventListener("submit", () => {
         submitButton.classList.add("is-loading");
-        submitButton.textContent = "리포트 생성 중...";
+        submitButton.textContent = "분석 결과 생성 중...";
         submitButton.disabled = true;
     });
 }
