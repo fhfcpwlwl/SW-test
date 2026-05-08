@@ -44,7 +44,7 @@ PYTORCH_MODEL_PATH = _default_pytorch_model_path()
 PYTORCH_MODEL_ENABLED = os.getenv("PYTORCH_MODEL_ENABLED", "True").lower() == "true"
 PYTORCH_MODEL_LABELS = [
     label.strip()
-    for label in os.getenv("PYTORCH_MODEL_LABELS", "class_0,class_1").split(",")
+    for label in os.getenv("PYTORCH_MODEL_LABELS", "여드름,정상 피부").split(",")
     if label.strip()
 ]
 MODEL_INPUT_SHAPE = (
