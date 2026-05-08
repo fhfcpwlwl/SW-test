@@ -93,33 +93,67 @@
             </div>
         </section>
 
-        <section class="report-card routine-showcase">
-            <div class="report-card-head">
-                <h2>케어 루틴</h2>
-                <span class="badge-pill">사진을 누르면 상품 정보로 이동</span>
-            </div>
-            <div class="routine-slider" id="routineSlider">
-                <button type="button" class="routine-nav routine-nav-prev" id="routinePrev" aria-label="이전 루틴">&larr;</button>
-                <div class="routine-stage">
-                    {% for step in result.report.routine.steps %}
-                    <article class="routine-slide{% if loop.first %} is-active{% endif %}" data-routine-slide>
-                        <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-media">
-                            <img src="{{ step.product_image_url }}" alt="{{ step.product_name }}" class="routine-image">
-                        </a>
-                        <div class="routine-copy">
-                            <span class="routine-period">{{ step.period }}</span>
-                            <strong>{{ step.title }}</strong>
-                            <p>{{ step.description }}</p>
-                            <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-product-link">{{ step.product_name }}</a>
-                        </div>
-                    </article>
-                    {% endfor %}
+        {% set morning_steps = result.report.routine.steps | selectattr('period', 'equalto', '아침') | list %}
+        {% set evening_steps = result.report.routine.steps | selectattr('period', 'equalto', '저녁') | list %}
+
+        <section class="report-grid">
+            <article class="report-card routine-showcase">
+                <div class="report-card-head">
+                    <h2>아침 루틴</h2>
+                    <span class="badge-pill">아침 단계별 보기</span>
                 </div>
-                <button type="button" class="routine-nav routine-nav-next" id="routineNext" aria-label="다음 루틴">&rarr;</button>
-            </div>
-            <div class="routine-progress">
-                <span id="routineCounter">1 / {{ result.report.routine.steps|length }}</span>
-            </div>
+                <div class="routine-slider" data-routine-slider>
+                    <button type="button" class="routine-nav routine-nav-prev" data-routine-prev aria-label="이전 아침 루틴">&larr;</button>
+                    <div class="routine-stage">
+                        {% for step in morning_steps %}
+                        <article class="routine-slide{% if loop.first %} is-active{% endif %}" data-routine-slide>
+                            <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-media">
+                                <img src="{{ step.product_image_url }}" alt="{{ step.product_name }}" class="routine-image">
+                            </a>
+                            <div class="routine-copy">
+                                <span class="routine-period">{{ step.period }}</span>
+                                <strong>{{ step.title }}</strong>
+                                <p>{{ step.description }}</p>
+                                <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-product-link">{{ step.product_name }}</a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="routine-nav routine-nav-next" data-routine-next aria-label="다음 아침 루틴">&rarr;</button>
+                </div>
+                <div class="routine-progress">
+                    <span data-routine-counter>1 / {{ morning_steps|length }}</span>
+                </div>
+            </article>
+
+            <article class="report-card routine-showcase">
+                <div class="report-card-head">
+                    <h2>저녁 루틴</h2>
+                    <span class="badge-pill">저녁 단계별 보기</span>
+                </div>
+                <div class="routine-slider" data-routine-slider>
+                    <button type="button" class="routine-nav routine-nav-prev" data-routine-prev aria-label="이전 저녁 루틴">&larr;</button>
+                    <div class="routine-stage">
+                        {% for step in evening_steps %}
+                        <article class="routine-slide{% if loop.first %} is-active{% endif %}" data-routine-slide>
+                            <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-media">
+                                <img src="{{ step.product_image_url }}" alt="{{ step.product_name }}" class="routine-image">
+                            </a>
+                            <div class="routine-copy">
+                                <span class="routine-period">{{ step.period }}</span>
+                                <strong>{{ step.title }}</strong>
+                                <p>{{ step.description }}</p>
+                                <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-product-link">{{ step.product_name }}</a>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="routine-nav routine-nav-next" data-routine-next aria-label="다음 저녁 루틴">&rarr;</button>
+                </div>
+                <div class="routine-progress">
+                    <span data-routine-counter>1 / {{ evening_steps|length }}</span>
+                </div>
+            </article>
         </section>
 
         <section class="report-card">

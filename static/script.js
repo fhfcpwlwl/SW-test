@@ -87,45 +87,51 @@ if (analysisForm && submitButton) {
 questionNames.forEach((name) => updateOptionState(name));
 updateProgress();
 
-const routineSlides = document.querySelectorAll("[data-routine-slide]");
-const routinePrev = document.getElementById("routinePrev");
-const routineNext = document.getElementById("routineNext");
-const routineCounter = document.getElementById("routineCounter");
+const routineSliders = document.querySelectorAll("[data-routine-slider]");
 
-if (routineSlides.length > 0) {
-    let activeRoutineIndex = 0;
+routineSliders.forEach((slider) => {
+    const slides = slider.querySelectorAll("[data-routine-slide]");
+    const prevButton = slider.querySelector("[data-routine-prev]");
+    const nextButton = slider.querySelector("[data-routine-next]");
+    const counter = slider.parentElement?.querySelector("[data-routine-counter]");
 
-    const renderRoutineSlide = () => {
-        routineSlides.forEach((slide, index) => {
-            slide.classList.toggle("is-active", index === activeRoutineIndex);
+    if (slides.length === 0) {
+        return;
+    }
+
+    let activeIndex = 0;
+
+    const renderSlide = () => {
+        slides.forEach((slide, index) => {
+            slide.classList.toggle("is-active", index === activeIndex);
         });
 
-        if (routineCounter) {
-            routineCounter.textContent = `${activeRoutineIndex + 1} / ${routineSlides.length}`;
+        if (counter) {
+            counter.textContent = `${activeIndex + 1} / ${slides.length}`;
         }
 
-        if (routinePrev) {
-            routinePrev.disabled = activeRoutineIndex === 0;
+        if (prevButton) {
+            prevButton.disabled = activeIndex === 0;
         }
 
-        if (routineNext) {
-            routineNext.disabled = activeRoutineIndex === routineSlides.length - 1;
+        if (nextButton) {
+            nextButton.disabled = activeIndex === slides.length - 1;
         }
     };
 
-    routinePrev?.addEventListener("click", () => {
-        if (activeRoutineIndex > 0) {
-            activeRoutineIndex -= 1;
-            renderRoutineSlide();
+    prevButton?.addEventListener("click", () => {
+        if (activeIndex > 0) {
+            activeIndex -= 1;
+            renderSlide();
         }
     });
 
-    routineNext?.addEventListener("click", () => {
-        if (activeRoutineIndex < routineSlides.length - 1) {
-            activeRoutineIndex += 1;
-            renderRoutineSlide();
+    nextButton?.addEventListener("click", () => {
+        if (activeIndex < slides.length - 1) {
+            activeIndex += 1;
+            renderSlide();
         }
     });
 
-    renderRoutineSlide();
-}
+    renderSlide();
+});
