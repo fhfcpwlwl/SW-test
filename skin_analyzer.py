@@ -458,3 +458,149 @@ def analyze_image(image_path: str) -> dict:
     result = analyzer.analyze_image(image_path)
     logger.debug("Returned analysis result for %s", image_path)
     return result
+
+
+def ensure_face_image(image_path: str) -> None:
+    """Validate that the uploaded image contains a face before AI inference."""
+    analyzer = SkinAnalyzer()
+    if not analyzer.detect_face(image_path):
+        raise ValueError("정면 얼굴 사진을 다시 업로드해 주세요.")
+
+
+def _copy_products_by_keys(product_keys: List[str]) -> List[Dict[str, str]]:
+    """Return official product definitions while preserving order and uniqueness."""
+    seen: set[str] = set()
+    selected: List[Dict[str, str]] = []
+    for key in product_keys:
+        if key in seen:
+            continue
+        seen.add(key)
+        selected.append(_copy_product(key))
+    return selected
+
+
+def build_pytorch_product_recommendations(skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Build product recommendations from the questionnaire while keeping image analysis AI-only."""
+    code = skin_mbti.get("code", "????")
+    keys = ["cleanser", "soothing_toner"]
+
+    if code.startswith("D"):
+        keys.extend(["moisture_ampoule", "soothing_cream"])
+    else:
+        keys.extend(["blemish_cream", "moisture_ampoule"])
+
+    if "W" in code or "P" in code:
+        keys.append("retinol")
+
+    keys.append("sunscreen")
+    return _copy_products_by_keys(keys)
+
+
+def build_pytorch_condition_cards(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Turn PyTorch class scores into explainable result cards."""
+    class_scores = analysis.get("pytorch_class_scores", {})
+    if not class_scores:
+        return []
+
+    cards: List[Dict[str, Any]] = []
+    for label, score in sorted(class_scores.items(), key=lambda item: item[1], reverse=True):
+        score_value = clamp_score(score)
+        cards.append(
+            {
+                "key": label,
+                "label": label,
+                "score": score_value,
+                "level": score_to_level(score_value),
+                "focus_area": "외부 .pth AI 분류 결과",
+                "description": f"외부 PyTorch 모델이 이 클래스로 판단한 확률입니다. 현재 점수는 {score_value}점입니다.",
+            }
+        )
+    return cards
+
+
+def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]]:
+    """Build a simple routine around the selected official products."""
+    product_map = {product["key"]: product for product in products}
+
+    morning = [
+        f"{product_map['cleanser']['name']}로 세안을 시작합니다.",
+        f"{product_map['soothing_toner']['name']}로 피부 결을 정돈합니다.",
+    ]
+    evening = [
+        f"{product_map['cleanser']['name']}로 메이크업과 노폐물을 정리합니다.",
+        f"{product_map['soothing_toner']['name']}로 피부를 편안하게 진정시킵니다.",
+    ]
+
+    if "moisture_ampoule" in product_map:
+        morning.append(f"{product_map['moisture_ampoule']['name']}로 수분을 채워줍니다.")
+        evening.append(f"{product_map['moisture_ampoule']['name']}를 충분히 레이어링합니다.")
+
+    if "blemish_cream" in product_map:
+        evening.append(f"트러블 부위에는 {product_map['blemish_cream']['name']}를 가볍게 사용합니다.")
+
+    if "retinol" in product_map:
+        evening.append(f"탄력 관리가 필요할 때 {product_map['retinol']['name']}를 밤 루틴에 추가합니다.")
+
+    if "soothing_cream" in product_map:
+        morning.append(f"건조함이 느껴지면 {product_map['soothing_cream']['name']}로 마무리합니다.")
+        evening.append(f"{product_map['soothing_cream']['name']}로 보습막을 마무리합니다.")
+
+    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+    return {"morning": morning[:5], "evening": evening[:5]}
+
+
+def build_pytorch_advice(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[str]:
+    """Build short guidance lines from the .pth result and questionnaire."""
+    predicted_class = analysis.get("pytorch_predicted_class", "unknown")
+    confidence = round(float(analysis.get("pytorch_confidence", 0)), 2)
+    code = skin_mbti.get("code", "????")
+
+    advice = [
+        f"외부 AI 모델은 이번 사진을 {predicted_class} 패턴으로 {confidence}% 신뢰도로 분류했습니다.",
+        "이 결과는 .pth 기반 분류 결과이며, 기존 규칙 기반 피부 점수는 사용하지 않았습니다.",
+    ]
+
+    if confidence < 60:
+        advice.append("정면 사진과 밝은 조명으로 다시 촬영하면 더 안정적인 결과를 볼 수 있습니다.")
+
+    if code.startswith("D"):
+        advice.append("설문상 건조 성향이 보여 수분 앰플과 보습 크림 중심 루틴을 권장합니다.")
+    elif code.startswith("O"):
+        advice.append("설문상 유분 성향이 보여 가벼운 진정 케어와 트러블 관리 제품을 우선 추천합니다.")
+
+    if "W" in code or "P" in code:
+        advice.append("탄력 또는 색소 고민 응답이 있어 야간 기능성 케어를 함께 제안합니다.")
+
+    return advice
+
+
+def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a report payload driven by the .pth model output."""
+    predicted_class = analysis.get("pytorch_predicted_class", "unknown")
+    confidence = clamp_score(float(analysis.get("pytorch_confidence", 0)))
+    cards = build_pytorch_condition_cards(analysis)
+    top_concerns = cards[:3]
+    products = build_pytorch_product_recommendations(skin_mbti)
+
+    if confidence >= 80:
+        overall_level = "판독 신뢰 높음"
+    elif confidence >= 60:
+        overall_level = "판독 완료"
+    else:
+        overall_level = "재촬영 권장"
+
+    summary = (
+        f"외부 .pth AI 모델이 이번 사진을 {predicted_class} 클래스로 분류했습니다. "
+        f"현재 신뢰도는 {confidence}점이며, 설문 코드 {skin_mbti.get('code', '????')}를 함께 반영해 루틴을 구성했습니다."
+    )
+
+    return {
+        "overall_score": confidence,
+        "overall_level": overall_level,
+        "summary": summary,
+        "top_concerns": top_concerns,
+        "condition_cards": cards,
+        "product_recommendations": products,
+        "routine": build_pytorch_routine(products),
+        "disclaimer": "이 결과는 외부 .pth 분류 모델과 설문 응답을 기반으로 한 참고용 안내입니다.",
+    }

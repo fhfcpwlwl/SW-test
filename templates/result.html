@@ -13,7 +13,7 @@
                 <span class="brand-orb"></span>
                 <span class="brand-copy">
                     <strong>Skin DNA Lab</strong>
-                    <span>사진 분석 기반 피부 리포트</span>
+                    <span>.pth AI 모델 기반 피부 리포트</span>
                 </span>
             </a>
             <a href="/" class="ghost-link">새 분석 시작</a>
@@ -22,40 +22,33 @@
         <section class="report-hero">
             <article class="hero-stage hero-stage-report">
                 <div class="hero-copy">
-                    <span class="eyebrow">분석 결과</span>
-                    <h1>{{ result.skin_mbti.code }} 피부 리포트</h1>
+                    <span class="eyebrow">AI 분석 결과</span>
+                    <h1>{{ result.skin_mbti.code }} 맞춤 리포트</h1>
                     <p class="hero-text">{{ result.report.summary }}</p>
                 </div>
 
                 <div class="report-snapshot">
                     <div class="snapshot-card snapshot-score">
-                        <span class="snapshot-label">종합 점수</span>
+                        <span class="snapshot-label">AI 신뢰도</span>
                         <strong>{{ result.report.overall_score }}</strong>
                         <p>{{ result.report.overall_level }}</p>
+                    </div>
+                    <div class="snapshot-card">
+                        <span class="snapshot-label">대표 판독</span>
+                        <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
+                        <p>{{ result.analysis.pytorch_confidence }}% 확률</p>
                     </div>
                     <div class="snapshot-card">
                         <span class="snapshot-label">업로드 사진</span>
                         <strong>{{ result.filename }}</strong>
                         <p>{{ result.content_type }}</p>
                     </div>
-                    <div class="snapshot-card">
-                        <span class="snapshot-label">기본 정보</span>
-                        <strong>{{ result.analysis.age }} / {{ result.analysis.gender }}</strong>
-                        <p>예상 연령과 성별 추정 결과</p>
-                    </div>
-                    {% if result.analysis.pytorch_predicted_class %}
-                    <div class="snapshot-card">
-                        <span class="snapshot-label">외부 모델</span>
-                        <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
-                        <p>신뢰도 {{ result.analysis.pytorch_confidence }}%</p>
-                    </div>
-                    {% endif %}
                 </div>
             </article>
 
             <aside class="hero-summary report-side">
                 <div class="summary-panel">
-                    <span class="panel-kicker">우선 고민</span>
+                    <span class="panel-kicker">상위 판독 결과</span>
                     <div class="priority-list">
                         {% for concern in result.report.top_concerns %}
                         <div class="priority-item">
@@ -66,7 +59,7 @@
                     </div>
                 </div>
                 <div class="summary-panel soft">
-                    <span class="panel-kicker">Skin MBTI</span>
+                    <span class="panel-kicker">설문 성향</span>
                     <div class="mbti-grid">
                         <div><strong>건성/지성</strong><span>{{ result.skin_mbti.dry_oily.label }}</span></div>
                         <div><strong>민감/저항성</strong><span>{{ result.skin_mbti.sensitive_resistant.label }}</span></div>
@@ -80,8 +73,8 @@
         <section class="report-grid">
             <article class="report-card report-card-wide">
                 <div class="report-card-head">
-                    <h2>맞춤 관리 코멘트</h2>
-                    <span class="badge-pill">먼저 확인할 내용</span>
+                    <h2>맞춤 안내</h2>
+                    <span class="badge-pill">AI 결과 + 설문 반영</span>
                 </div>
                 <div class="advice-stream">
                     {% for advice in result.advice %}
@@ -116,8 +109,8 @@
 
         <section class="report-card">
             <div class="report-card-head">
-                <h2>세부 분석 카드</h2>
-                <span class="badge-pill">상세 점수</span>
+                <h2>클래스별 AI 점수</h2>
+                <span class="badge-pill">.pth 분류 결과</span>
             </div>
             <div class="metric-grid">
                 {% for card in result.report.condition_cards %}
@@ -128,7 +121,7 @@
                     </div>
                     <div class="metric-score">{{ card.score }}</div>
                     <p>{{ card.description }}</p>
-                    <div class="focus-line">집중 부위 {{ card.focus_area }}</div>
+                    <div class="focus-line">{{ card.focus_area }}</div>
                 </article>
                 {% endfor %}
             </div>
@@ -138,7 +131,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>아침 루틴</h2>
-                    <span class="badge-pill">낮 시간 관리</span>
+                    <span class="badge-pill">출근 전 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.morning %}
@@ -150,7 +143,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>저녁 루틴</h2>
-                    <span class="badge-pill">밤 시간 관리</span>
+                    <span class="badge-pill">귀가 후 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.evening %}

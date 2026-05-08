@@ -1,8 +1,8 @@
 """Flask frontend for the skin analysis experience."""
 from copy import deepcopy
 
-from flask import Flask, jsonify, make_response, render_template, request
 import requests
+from flask import Flask, jsonify, make_response, render_template, request
 
 from config import BACKEND_URL
 from logger import setup_logger
@@ -18,6 +18,9 @@ DEFAULT_RESULT = {
     "analysis": {
         "age": "-",
         "gender": "-",
+        "pytorch_predicted_class": "-",
+        "pytorch_confidence": 0,
+        "pytorch_class_scores": {},
     },
     "advice": [],
     "skin_mbti": {
@@ -30,7 +33,7 @@ DEFAULT_RESULT = {
     "report": {
         "overall_score": 0,
         "overall_level": "분석 준비 중",
-        "summary": "분석 결과를 불러오는 중 문제가 있어 기본 정보만 표시합니다.",
+        "summary": "아직 분석 결과가 없습니다.",
         "top_concerns": [],
         "condition_cards": [],
         "product_recommendations": [],
@@ -38,7 +41,7 @@ DEFAULT_RESULT = {
             "morning": [],
             "evening": [],
         },
-        "disclaimer": "결과 표시 중 오류가 발생했습니다. 입력 이미지와 서버 상태를 다시 확인해 주세요.",
+        "disclaimer": "결과를 불러오지 못했습니다. 다시 시도해 주세요.",
     },
 }
 
@@ -79,7 +82,7 @@ def health():
 @app.route("/test")
 def test():
     """Simple sanity-check endpoint."""
-    return jsonify({"message": "플라스크 서버가 정상 작동 중입니다."}), 200
+    return jsonify({"message": "Flask 서버가 정상 동작 중입니다."}), 200
 
 
 @app.route("/analyze", methods=["GET"])
@@ -87,7 +90,7 @@ def analyze_get():
     """Informational endpoint for direct GET access."""
     return jsonify(
         {
-            "message": "이 경로는 분석 전송용입니다. Flask 서버를 실행한 뒤 http://127.0.0.1:5000 에서 이용해 주세요."
+            "message": "이 경로는 분석 전송용입니다. 브라우저에서는 http://127.0.0.1:5000 에서 이용해 주세요."
         }
     ), 200
 
@@ -125,6 +128,12 @@ def analyze():
             error_msg = error_data.get("error", "잘못된 요청입니다.")
             logger.warning("Backend returned 400: %s", error_msg)
             return render_template("index.html", error=f"사진 분석에 실패했습니다. {error_msg}"), 400
+
+        if response.status_code == 503:
+            error_data = response.json()
+            error_msg = error_data.get("error", "AI 모델이 준비되지 않았습니다.")
+            logger.error("Backend returned 503: %s", error_msg)
+            return render_template("index.html", error=error_msg), 503
 
         if response.status_code != 200:
             logger.error("Backend returned %s", response.status_code)
