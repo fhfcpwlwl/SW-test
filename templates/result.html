@@ -13,7 +13,7 @@
                 <span class="brand-orb"></span>
                 <span class="brand-copy">
                     <strong>Skin DNA Lab</strong>
-                    <span>Report edition</span>
+                    <span>사진 분석 기반 피부 리포트</span>
                 </span>
             </a>
             <a href="/" class="ghost-link">새 분석 시작</a>
@@ -22,33 +22,33 @@
         <section class="report-hero">
             <article class="hero-stage hero-stage-report">
                 <div class="hero-copy">
-                    <span class="eyebrow">Analysis Result</span>
+                    <span class="eyebrow">분석 결과</span>
                     <h1>{{ result.skin_mbti.code }} 피부 리포트</h1>
                     <p class="hero-text">{{ result.report.summary }}</p>
                 </div>
 
                 <div class="report-snapshot">
                     <div class="snapshot-card snapshot-score">
-                        <span class="snapshot-label">Overall Score</span>
+                        <span class="snapshot-label">종합 점수</span>
                         <strong>{{ result.report.overall_score }}</strong>
                         <p>{{ result.report.overall_level }}</p>
                     </div>
                     <div class="snapshot-card">
-                        <span class="snapshot-label">Photo</span>
+                        <span class="snapshot-label">업로드 사진</span>
                         <strong>{{ result.filename }}</strong>
                         <p>{{ result.content_type }}</p>
                     </div>
                     <div class="snapshot-card">
-                        <span class="snapshot-label">Profile</span>
+                        <span class="snapshot-label">기본 정보</span>
                         <strong>{{ result.analysis.age }} / {{ result.analysis.gender }}</strong>
-                        <p>예상 연령과 성별 추정치</p>
+                        <p>예상 연령과 성별 추정 결과</p>
                     </div>
                 </div>
             </article>
 
             <aside class="hero-summary report-side">
                 <div class="summary-panel">
-                    <span class="panel-kicker">Top Concerns</span>
+                    <span class="panel-kicker">우선 고민</span>
                     <div class="priority-list">
                         {% for concern in result.report.top_concerns %}
                         <div class="priority-item">
@@ -74,7 +74,7 @@
             <article class="report-card report-card-wide">
                 <div class="report-card-head">
                     <h2>핵심 관리 코멘트</h2>
-                    <span class="badge-pill">Priority Notes</span>
+                    <span class="badge-pill">먼저 확인할 내용</span>
                 </div>
                 <div class="advice-stream">
                     {% for advice in result.advice %}
@@ -85,16 +85,23 @@
 
             <article class="report-card">
                 <div class="report-card-head">
-                    <h2>추천 제품 방향</h2>
-                    <span class="badge-pill">Products</span>
+                    <h2>추천 제품</h2>
+                    <span class="badge-pill">공식 사이트 연결</span>
                 </div>
-                <div class="stack-list">
+                <div class="product-grid">
                     {% for item in result.report.product_recommendations %}
-                    <div class="soft-block">
-                        <strong>{{ item.category }}</strong>
-                        <p>{{ item.product_type }}</p>
-                        <span>{{ item.why }}</span>
-                    </div>
+                    <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
+                        <div class="product-image-wrap">
+                            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
+                        </div>
+                        <div class="product-copy">
+                            <span class="product-step">{{ item.step }}</span>
+                            <strong>{{ item.name }}</strong>
+                            <p>{{ item.summary }}</p>
+                            <span class="product-meta">{{ item.brand }} · {{ item.price }}</span>
+                            <span class="product-why">{{ item.why }}</span>
+                        </div>
+                    </a>
                     {% endfor %}
                 </div>
             </article>
@@ -103,7 +110,7 @@
         <section class="report-card">
             <div class="report-card-head">
                 <h2>세부 분석 카드</h2>
-                <span class="badge-pill">Condition Metrics</span>
+                <span class="badge-pill">상세 점수</span>
             </div>
             <div class="metric-grid">
                 {% for card in result.report.condition_cards %}
@@ -124,7 +131,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>아침 루틴</h2>
-                    <span class="badge-pill">Morning</span>
+                    <span class="badge-pill">오전 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.morning %}
@@ -136,7 +143,7 @@
             <article class="report-card">
                 <div class="report-card-head">
                     <h2>저녁 루틴</h2>
-                    <span class="badge-pill">Night</span>
+                    <span class="badge-pill">저녁 관리</span>
                 </div>
                 <ol class="routine-list">
                     {% for step in result.report.routine.evening %}

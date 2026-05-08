@@ -7,7 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Skin DNA Lab</title>
+    <title>내 피부 리포트</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="theme-landing">
@@ -21,39 +21,39 @@
                 <span class="brand-orb"></span>
                 <span class="brand-copy">
                     <strong>Skin DNA Lab</strong>
-                    <span>Face reading with routine logic</span>
+                    <span>사진 분석 기반 피부 리포트</span>
                 </span>
             </a>
-            <div class="header-note">정면 사진과 간단한 설문만으로 맞춤 리포트를 만듭니다.</div>
+            <div class="header-note">정면 사진과 간단한 설문만으로 맞춤 리포트를 만듭니다</div>
         </header>
 
         <section class="landing-hero">
             <article class="hero-stage">
                 <div class="hero-copy">
-                    <span class="eyebrow">AI Skin Session</span>
-                    <h1>한 번의 업로드로 끝내는 피부 상태 점검</h1>
+                    <span class="eyebrow">피부 분석</span>
+                    <h1>내 피부 리포트</h1>
                     <p class="hero-text">
-                        사진 분석과 피부 MBTI 설문을 결합해 현재 컨디션, 우선 고민, 추천 제품 방향,
-                        아침과 저녁 루틴까지 한 장의 리포트로 정리합니다.
+                        얼굴 사진과 간단한 설문을 바탕으로 현재 피부 상태, 우선 관리 포인트,
+                        추천 제품 방향, 아침과 저녁 루틴까지 한 번에 정리해 드립니다.
                     </p>
                 </div>
 
                 <div class="hero-preview">
                     <div class="preview-card preview-card-main">
-                        <span class="preview-label">Output</span>
-                        <strong>핵심 고민 3가지</strong>
-                        <p>주름, 모공, 붉은기, 색소침착 같은 지표를 우선순위 중심으로 정리합니다.</p>
+                        <span class="preview-label">결과 미리보기</span>
+                        <strong>지금 먼저 볼 포인트</strong>
+                        <p>주름, 모공, 붉은기, 색소침착 같은 지표를 우선순위 중심으로 보여드립니다.</p>
                     </div>
                     <div class="preview-stack">
                         <div class="preview-card">
-                            <span class="preview-label">Routine</span>
+                            <span class="preview-label">관리 루틴</span>
                             <strong>아침 / 저녁 루틴</strong>
-                            <p>실제로 따라 하기 쉬운 관리 순서를 제안합니다.</p>
+                            <p>바로 따라 하기 쉬운 순서로 정리해 드립니다.</p>
                         </div>
                         <div class="preview-card">
-                            <span class="preview-label">Guide</span>
-                            <strong>제품 방향 제안</strong>
-                            <p>무엇을 사야 하는지보다 어떤 타입이 맞는지를 먼저 보여줍니다.</p>
+                            <span class="preview-label">추천 방향</span>
+                            <strong>제품 선택 가이드</strong>
+                            <p>무엇을 고르면 좋을지 피부 상태에 맞춰 방향을 알려드립니다.</p>
                         </div>
                     </div>
                 </div>
@@ -61,7 +61,7 @@
 
             <aside class="hero-summary">
                 <div class="summary-panel">
-                    <span class="panel-kicker">Flow</span>
+                    <span class="panel-kicker">이용 순서</span>
                     <ol class="summary-steps">
                         <li>얼굴 사진 업로드</li>
                         <li>피부 MBTI 설문 응답</li>
@@ -69,8 +69,8 @@
                     </ol>
                 </div>
                 <div class="summary-panel soft">
-                    <span class="panel-kicker">Best Results</span>
-                    <p>자연광, 정면 얼굴, 무보정 사진일수록 결과가 더 안정적입니다.</p>
+                    <span class="panel-kicker">촬영 팁</span>
+                    <p>자연광에서 찍은 정면 얼굴 사진일수록 결과가 더 안정적으로 나옵니다.</p>
                 </div>
             </aside>
         </section>
@@ -78,7 +78,7 @@
         <form action="/analyze" method="post" enctype="multipart/form-data" class="analysis-form" id="analysisForm">
             <aside class="form-side">
                 <div class="sticky-panel">
-                    <span class="eyebrow">Session</span>
+                    <span class="eyebrow">진행 상태</span>
                     <h2>분석 준비 상태</h2>
                     <div class="progress-block">
                         <div class="progress-meta">
@@ -96,12 +96,12 @@
                             <span id="fileStatus">아직 선택되지 않았습니다.</span>
                         </div>
                         <div class="check-item">
-                            <strong>권장 환경</strong>
+                            <strong>권장 사진</strong>
                             <span>정면, 무보정, 그림자 적은 사진</span>
                         </div>
                         <div class="check-item">
-                            <strong>분석 결과</strong>
-                            <span>점수, 관리 우선순위, 제품 방향, 루틴</span>
+                            <strong>리포트 구성</strong>
+                            <span>점수, 관리 포인트, 제품 방향, 루틴</span>
                         </div>
                     </div>
 
@@ -140,13 +140,13 @@
                             <h2>피부 MBTI 설문</h2>
                             <p>현재 피부 상태뿐 아니라 평소 반응 성향까지 함께 반영하기 위한 짧은 설문입니다.</p>
                         </div>
-                        <span class="badge-pill">12 Questions</span>
+                        <span class="badge-pill">총 12문항</span>
                     </div>
 
                     <div class="question-section">
                         <div class="question-section-head">
                             <h3>건성 vs 지성</h3>
-                            <p>세안 후와 오후 피부 변화를 기준으로 답해 주세요.</p>
+                            <p>세안 직후와 오후 피부 변화를 떠올리며 답해 주세요.</p>
                         </div>
                         <div class="question-list">
                             <div class="question-block">
@@ -176,7 +176,7 @@
                     <div class="question-section">
                         <div class="question-section-head">
                             <h3>민감 vs 저항성</h3>
-                            <p>자극, 붉은기, 가려움 같은 반응을 떠올리며 답해 주세요.</p>
+                            <p>자극, 붉은기, 가려움처럼 피부가 반응하는 모습을 기준으로 답해 주세요.</p>
                         </div>
                         <div class="question-list">
                             <div class="question-block">
@@ -206,7 +206,7 @@
                     <div class="question-section">
                         <div class="question-section-head">
                             <h3>색소형 vs 비색소형</h3>
-                            <p>잡티와 흔적이 남는 경향을 기준으로 답해 주세요.</p>
+                            <p>잡티와 자국이 남는 편인지 평소 경향을 기준으로 답해 주세요.</p>
                         </div>
                         <div class="question-list">
                             <div class="question-block">
@@ -236,7 +236,7 @@
                     <div class="question-section">
                         <div class="question-section-head">
                             <h3>주름형 vs 탄력형</h3>
-                            <p>표정 주름, 탄력감, 자외선 노출 습관을 기준으로 답해 주세요.</p>
+                            <p>주름, 탄력, 자외선 노출 습관을 떠올리며 답해 주세요.</p>
                         </div>
                         <div class="question-list">
                             <div class="question-block">

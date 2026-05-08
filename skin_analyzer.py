@@ -12,6 +12,7 @@ from config import (
     SKIN_ADVICE,
     TARGET_IMAGE_SIZE,
 )
+from hyafilia_products import PRODUCTS
 from logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -328,88 +329,80 @@ def build_condition_cards(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     ]
 
 
-def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Generate MBTI-aware product category suggestions."""
+def _copy_product(key: str) -> Dict[str, str]:
+    """Return a copy of an official product definition."""
+    return dict(PRODUCTS[key])
+
+
+def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Select official Hyafilia USA products only."""
     code = skin_mbti.get("code", "????")
-    recommendations: List[Dict[str, Any]] = [
-        {
-            "category": "\uD074\uB80C\uC800",
-            "product_type": "\uC57D\uC0B0\uC131 \uC824 \uD074\uB80C\uC800" if code.startswith("D") else "\uC800\uC790\uADF9 \uC57D\uC0B0\uC131 \uD3FC \uD074\uB80C\uC800",
-            "why": "\uC138\uC548 \uD6C4 \uB2F9\uAE40\uC744 \uC904\uC774\uBA74\uC11C \uC7A5\uBCBD\uC744 \uB35C \uC790\uADF9\uD558\uB294 \uBCA0\uC774\uC2A4\uAC00 \uC88B\uC2B5\uB2C8\uB2E4."
-            if code.startswith("D")
-            else "\uACFC\uD55C \uD53C\uC9C0 \uC81C\uAC70 \uC5C6\uC774 \uBAA8\uACF5 \uBD80\uD558\uB97C \uB0AE\uCD94\uB294 \uC138\uC815\uB825\uC774 \uC911\uC694\uD569\uB2C8\uB2E4.",
-        }
+    recommendations: List[Dict[str, str]] = [
+        _copy_product("cleanser"),
+        _copy_product("soothing_toner"),
     ]
 
-    if metrics["redness"] >= 45 or "S" in code:
-        recommendations.append(
-            {
-                "category": "\uC9C4\uC815 \uC138\uB7FC",
-                "product_type": "\uD310\uD14C\uB180\u00B7\uC2DC\uCE74\u00B7\uC54C\uB780\uD1A0\uC778 \uACC4\uC5F4",
-                "why": "\uBD89\uC740\uAE30\uC640 \uC790\uADF9 \uC2E0\uD638\uAC00 \uBCF4\uC5EC \uC7A5\uBCBD \uC9C4\uC815 \uC911\uC2EC\uC758 \uC138\uB7FC\uC774 \uC798 \uB9DE\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    needs_acne = metrics["acne_inflamed"] >= 45 or metrics["acne_noninflamed"] >= 45 or code.startswith("O")
+    needs_wrinkle = metrics["wrinkle"] >= 45 or metrics["sagging"] >= 45 or code.endswith("W")
+    needs_dryness = code.startswith("D") or skin_mbti.get("sensitive_resistant", {}).get("code") == "S" or metrics["skin_scores"]["health"] < 55
+    needs_pigment = metrics["pigmentation"] >= 40 or "P" in code
 
-    if metrics["pores"] >= 50 or metrics["acne_noninflamed"] >= 45 or code.startswith("O"):
-        recommendations.append(
-            {
-                "category": "\uBAA8\uACF5/\uAC01\uC9C8 \uCF00\uC5B4",
-                "product_type": "BHA \uB610\uB294 PHA \uD1A0\uB108/\uC138\uB7FC",
-                "why": "\uB098\uBE44\uC874 \uBAA8\uACF5\uACFC \uBA74\uD3EC\uC131 \uD2B8\uB7EC\uBE14 \uC644\uD654\uC5D0 \uB3C4\uC6C0\uB418\uB294 \uC800\uAC15\uB3C4 \uAC01\uC9C8 \uCF00\uC5B4\uAC00 \uC801\uD569\uD569\uB2C8\uB2E4.",
-            }
-        )
+    if needs_acne:
+        recommendations.append(_copy_product("blemish_cream"))
+    elif needs_wrinkle or needs_pigment:
+        recommendations.append(_copy_product("retinol"))
+    else:
+        recommendations.append(_copy_product("moisture_ampoule"))
 
-    if metrics["pigmentation"] >= 40 or "P" in code:
-        recommendations.append(
-            {
-                "category": "\uBE0C\uB77C\uC774\uD2B8\uB2DD \uC138\uB7FC",
-                "product_type": "\uB098\uC774\uC544\uC2E0\uC544\uB9C8\uC774\uB4DC\u00B7\uD2B8\uB77C\uB125\uC0BC\uC0B0\u00B7\uBE44\uD0C0\uBBFCCC \uC720\uB3C4\uCCB4",
-                "why": "\uC7A1\uD2F0\uC640 \uC5FC\uC99D \uD6C4 \uD754\uC801 \uC644\uD654\uB97C \uC704\uD574 \uD1A4 \uBCF4\uC815 \uC131\uBD84\uC744 \uD568\uAED8 \uC4F0\uB294 \uD3B8\uC774 \uC88B\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    if needs_dryness:
+        recommendations.append(_copy_product("soothing_cream"))
+    elif not needs_acne:
+        recommendations.append(_copy_product("moisture_ampoule"))
 
-    if metrics["wrinkle"] >= 45 or metrics["sagging"] >= 45 or code.endswith("W"):
-        recommendations.append(
-            {
-                "category": "\uD0C4\uB825 \uCF00\uC5B4",
-                "product_type": "\uB808\uD2F0\uB180 \uB300\uCCB4\uCCB4 \uB610\uB294 \uD39D\uD0C0\uC774\uB4DC \uD06C\uB9BC",
-                "why": "\uC774\uB9C8, \uB208\uAC00, \uD314\uC790 \uBD80\uC704\uC758 \uD0C4\uB825 \uC800\uD558 \uC2E0\uD638\uAC00 \uBCF4\uC5EC \uC548\uD2F0\uC5D0\uC774\uC9D5 \uCD95\uC744 \uCD94\uAC00\uD558\uB294 \uAC83\uC774 \uC88B\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    recommendations.append(_copy_product("sunscreen"))
 
-    recommendations.append(
-        {
-            "category": "\uC120\uCF00\uC5B4",
-            "product_type": "SPF50+ PA++++ \uC790\uC678\uC120 \uCC28\uB2E8\uC81C",
-            "why": "\uBD89\uC740\uAE30, \uC0C9\uC18C\uCE68\uCC29, \uD0C4\uB825 \uC800\uD558\uB97C \uB3D9\uC2DC\uC5D0 \uC545\uD654\uC2DC\uD0A4\uB294 \uC790\uC678\uC120 \uAD00\uB9AC\uAC00 \uD544\uC218\uC785\uB2C8\uB2E4.",
-        }
-    )
-    return recommendations[:5]
+    unique_products: List[Dict[str, str]] = []
+    seen: set[str] = set()
+    for product in recommendations:
+        if product["key"] in seen:
+            continue
+        seen.add(product["key"])
+        unique_products.append(product)
+
+    return unique_products
 
 
-def build_routine(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> Dict[str, List[str]]:
-    """Build a simple skincare routine."""
+def build_routine(metrics: Dict[str, Any], skin_mbti: Dict[str, Any], products: List[Dict[str, str]]) -> Dict[str, List[str]]:
+    """Build a routine that references only official Hyafilia USA products."""
+    product_map = {product["key"]: product for product in products}
+
     morning = [
-        "\uC800\uC790\uADF9 \uD074\uB80C\uC800\uB85C \uAC00\uBCD1\uAC8C \uC138\uC548\uD569\uB2C8\uB2E4.",
-        "\uC9C4\uC815 \uB610\uB294 \uC218\uBD84 \uD1A0\uB108\uB85C \uD53C\uBD80 \uACB0\uC744 \uC815\uB3C8\uD569\uB2C8\uB2E4.",
-        "\uD604\uC7AC \uACE0\uBBFC\uC5D0 \uB9DE\uB294 \uAE30\uB2A5\uC131 \uC138\uB7FC\uC744 1\uAC00\uC9C0 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        "\uBCF4\uC2B5 \uD06C\uB9BC\uC73C\uB85C \uC720\uC218\uBD84 \uBC38\uB7F0\uC2A4\uB97C \uB9DE\uCDA5\uB2C8\uB2E4.",
-        "SPF50+ \uC120\uD06C\uB9BC\uC73C\uB85C \uB9C8\uBB34\uB9AC\uD569\uB2C8\uB2E4.",
-    ]
-    evening = [
-        "\uC120\uD06C\uB9BC\uACFC \uB178\uD3D0\uBB3C\uC744 \uBD80\uB4DC\uB7FD\uAC8C \uC138\uC815\uD569\uB2C8\uB2E4.",
-        "\uBAA8\uACF5/\uD2B8\uB7EC\uBE14\uC774 \uACE0\uBBFC\uC774\uBA74 \uC8FC 2~3\uD68C \uAC01\uC9C8 \uCF00\uC5B4\uB97C \uCD94\uAC00\uD569\uB2C8\uB2E4.",
-        "\uC0C9\uC18C \uB610\uB294 \uD0C4\uB825 \uACE0\uBBFC\uC5D0 \uB9DE\uB294 \uAE30\uB2A5\uC131 \uC138\uB7FC\uC744 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        "\uC7A5\uBCBD \uD06C\uB9BC\uC73C\uB85C \uB9C8\uBB34\uB9AC\uD558\uACE0, \uAC74\uC131 \uACBD\uD5A5\uC774\uBA74 \uC218\uBA74\uD329\uC744 \uAC00\uBCD1\uAC8C \uB367\uBC1C\uB77C\uC90D\uB2C8\uB2E4.",
+        f"세안은 {product_map['cleanser']['name']}로 가볍게 시작합니다.",
+        f"피부 결 정돈은 {product_map['soothing_toner']['name']}로 진행합니다.",
     ]
 
-    if skin_mbti.get("dry_oily", {}).get("code") == "D":
-        morning[1] = "\uC218\uBD84 \uC5D0\uC13C\uC2A4 \uB610\uB294 \uD1A0\uB108\uB97C \uCDA9\uBD84\uD788 \uB808\uC774\uC5B4\uB9C1\uD569\uB2C8\uB2E4."
-        evening[-1] = "\uC138\uB77C\uB9C8\uC774\uB4DC\u00B7\uCF5C\uB808\uC2A4\uD14C\uB864 \uACC4\uC5F4 \uD06C\uB9BC\uC73C\uB85C \uC218\uBD84 \uC190\uC2E4\uC744 \uB9C9\uC544\uC90D\uB2C8\uB2E4."
-    if skin_mbti.get("sensitive_resistant", {}).get("code") == "S":
-        evening[1] = "\uAC01\uC9C8 \uCF00\uC5B4\uB294 \uC8FC 1~2\uD68C \uC800\uAC15\uB3C4\uB85C \uC2DC\uC791\uD558\uACE0 \uC790\uADF9 \uBC18\uC751\uC744 \uD655\uC778\uD569\uB2C8\uB2E4."
-    if metrics["acne_inflamed"] >= 50:
-        evening.insert(2, "\uC5FC\uC99D\uC131 \uD2B8\uB7EC\uBE14 \uBD80\uC704\uC5D0\uB294 \uC2A4\uD33F \uCF00\uC5B4\uB97C \uAD6D\uC18C\uC801\uC73C\uB85C \uC0AC\uC6A9\uD569\uB2C8\uB2E4.")
+    evening = [
+        f"저녁 세안은 {product_map['cleanser']['name']}로 부드럽게 마무리합니다.",
+        f"세안 후 {product_map['soothing_toner']['name']}로 피부를 진정시키고 다음 단계를 준비합니다.",
+    ]
+
+    if "moisture_ampoule" in product_map:
+        morning.append(f"수분 보충이 필요하면 {product_map['moisture_ampoule']['name']}를 얇게 레이어링합니다.")
+        evening.append(f"건조함이 느껴지는 날에는 {product_map['moisture_ampoule']['name']}를 충분히 사용합니다.")
+
+    if "blemish_cream" in product_map:
+        morning.append(f"트러블 관리가 필요한 부위에는 {product_map['blemish_cream']['name']}를 소량 사용합니다.")
+        evening.append(f"트러블 진정 단계로 {product_map['blemish_cream']['name']}를 집중 사용합니다.")
+
+    if "retinol" in product_map:
+        evening.append(f"탄력과 결 케어를 위해 밤에는 {product_map['retinol']['name']}를 소량 사용합니다.")
+
+    if "soothing_cream" in product_map:
+        evening.append(f"마지막 보습막은 {product_map['soothing_cream']['name']}로 정리합니다.")
+        morning.append(f"건조하거나 예민한 날 아침에는 {product_map['soothing_cream']['name']}를 얇게 덧발라 줍니다.")
+
+    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+
     return {"morning": morning[:5], "evening": evening[:5]}
 
 
@@ -445,14 +438,16 @@ def build_personalized_report(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]
         f"{top_concerns[0]['label']}, {top_concerns[1]['label']}, {top_concerns[2]['label']}\uC785\uB2C8\uB2E4."
     )
 
+    products = build_product_recommendations(metrics, skin_mbti)
+
     return {
         "overall_score": overall_score,
         "overall_level": overall_level,
         "summary": summary,
         "top_concerns": top_concerns,
         "condition_cards": cards,
-        "product_recommendations": build_product_recommendations(metrics, skin_mbti),
-        "routine": build_routine(metrics, skin_mbti),
+        "product_recommendations": products,
+        "routine": build_routine(metrics, skin_mbti, products),
         "disclaimer": "\uC774 \uACB0\uACFC\uB294 \uC0AC\uC9C4 \uAE30\uBC18 \uCC38\uACE0\uC6A9 \uBD84\uC11D\uC774\uBA70, \uD53C\uBD80 \uC9C8\uD658\uC774 \uC758\uC2EC\uB418\uBA74 \uC804\uBB38 \uC9C4\uB8CC\uAC00 \uC6B0\uC120\uC785\uB2C8\uB2E4.",
     }
 
