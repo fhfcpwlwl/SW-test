@@ -8,9 +8,10 @@
 </head>
 <body class="theme-report">
     <div class="page-shell">
-        <section class="report-hero glass-card">
+        <section class="report-hero editorial-card">
             <div class="hero-copy">
-                <span class="eyebrow">Skin Report</span>
+                <span class="eyebrow">Report</span>
+                <p class="hero-kicker">Personal skin snapshot</p>
                 <h1>{{ result.skin_mbti.code }} 피부 리포트</h1>
                 <p class="hero-text">{{ result.report.summary }}</p>
 
@@ -30,20 +31,20 @@
                 </div>
             </div>
 
-            <aside class="score-stage">
+            <aside class="score-stage score-stage-strong">
                 <div class="score-ring">
                     <strong>{{ result.report.overall_score }}</strong>
                     <span>종합 점수</span>
                 </div>
-                <p>현재 피부 상태를 기준으로 우선 관리가 필요한 영역을 정리한 결과입니다.</p>
+                <p>완벽한 피부를 평가하는 점수라기보다, 지금 우선순위를 잡기 위한 현재 컨디션 지표입니다.</p>
             </aside>
         </section>
 
         <section class="report-overview">
-            <article class="glass-card panel-card">
+            <article class="editorial-card panel-card">
                 <div class="panel-title-row">
                     <h2>기본 프로필</h2>
-                    <span class="badge-pill">기본 정보</span>
+                    <span class="badge-pill">Overview</span>
                 </div>
                 <div class="profile-list">
                     <div class="info-row"><strong>예상 나이</strong><span>{{ result.analysis.age }}</span></div>
@@ -56,10 +57,10 @@
                 </div>
             </article>
 
-            <article class="glass-card panel-card">
+            <article class="editorial-card panel-card panel-tinted">
                 <div class="panel-title-row">
                     <h2>우선 관리 포인트</h2>
-                    <span class="badge-pill">핵심 고민</span>
+                    <span class="badge-pill">Priority</span>
                 </div>
                 <div class="chip-list">
                     {% for concern in result.report.top_concerns %}
@@ -74,10 +75,10 @@
             </article>
         </section>
 
-        <section class="glass-card panel-card">
+        <section class="editorial-card panel-card">
             <div class="panel-title-row">
                 <h2>세부 피부 분석</h2>
-                <span class="badge-pill">조건별 카드</span>
+                <span class="badge-pill">Condition Cards</span>
             </div>
             <div class="metric-grid">
                 {% for card in result.report.condition_cards %}
@@ -95,10 +96,10 @@
         </section>
 
         <section class="report-overview">
-            <article class="glass-card panel-card">
+            <article class="editorial-card panel-card">
                 <div class="panel-title-row">
                     <h2>추천 제품 카테고리</h2>
-                    <span class="badge-pill">제품 방향</span>
+                    <span class="badge-pill">Products</span>
                 </div>
                 <div class="stack-list">
                     {% for item in result.report.product_recommendations %}
@@ -110,10 +111,10 @@
                 </div>
             </article>
 
-            <article class="glass-card panel-card">
+            <article class="editorial-card panel-card">
                 <div class="panel-title-row">
                     <h2>추천 스킨케어 루틴</h2>
-                    <span class="badge-pill">아침 / 저녁</span>
+                    <span class="badge-pill">Morning / Night</span>
                 </div>
                 <div class="routine-grid">
                     <div class="soft-block">
@@ -136,7 +137,7 @@
             </article>
         </section>
 
-        <section class="glass-card footer-panel">
+        <section class="editorial-card footer-panel">
             <p>{{ result.report.disclaimer }}</p>
             <a href="/" class="primary-link">다시 분석하기</a>
         </section>
