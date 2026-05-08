@@ -1,4 +1,6 @@
 """Flask frontend for the skin analysis experience."""
+import base64
+import io
 from copy import deepcopy
 
 import requests
@@ -15,6 +17,7 @@ app = Flask(__name__)
 DEFAULT_RESULT = {
     "filename": "-",
     "content_type": "-",
+    "uploaded_preview": None,
     "analysis": {
         "age": "-",
         "gender": "-",
@@ -117,7 +120,12 @@ def analyze():
             return render_template("index.html", error=error_msg), 400
 
         file.seek(0)
-        files = {"file": (create_safe_filename(file.filename), file, file.mimetype)}
+        file_bytes = file.read()
+        mime_type = file.mimetype or "image/jpeg"
+        preview_data = base64.b64encode(file_bytes).decode("utf-8")
+        preview_url = f"data:{mime_type};base64,{preview_data}"
+
+        files = {"file": (create_safe_filename(file.filename), io.BytesIO(file_bytes), mime_type)}
         data = request.form.to_dict(flat=True)
 
         logger.info("Sending analysis request for file: %s", file.filename)
@@ -140,6 +148,7 @@ def analyze():
             return render_template("index.html", error="서버 오류가 발생했습니다."), 500
 
         result = merge_result_data(DEFAULT_RESULT, response.json())
+        result["uploaded_preview"] = preview_url
         logger.info("Analysis completed successfully")
         return render_template("result.html", result=result), 200
 

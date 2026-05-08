@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>피부 분석 결과</title>
+    <title>Skin Lab 결과</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="theme-report">
@@ -12,43 +12,46 @@
             <a href="/" class="brand-mark">
                 <span class="brand-orb"></span>
                 <span class="brand-copy">
-                    <strong>Skin DNA Lab</strong>
-                    <span>.pth AI 모델 기반 피부 리포트</span>
+                    <strong>Skin Lab</strong>
+                    <span>AI 피부 리포트</span>
                 </span>
             </a>
-            <a href="/" class="ghost-link">새 분석 시작</a>
+            <a href="/" class="ghost-link">새 분석</a>
         </header>
 
         <section class="report-hero">
             <article class="hero-stage hero-stage-report">
                 <div class="hero-copy">
-                    <span class="eyebrow">AI 분석 결과</span>
-                    <h1>{{ result.skin_mbti.code }} 맞춤 리포트</h1>
+                    <span class="eyebrow">분석 결과</span>
+                    <h1>{{ result.skin_mbti.code }} 리포트</h1>
                     <p class="hero-text">{{ result.report.summary }}</p>
                 </div>
 
-                <div class="report-snapshot">
+                <div class="report-snapshot report-snapshot-compact">
                     <div class="snapshot-card snapshot-score">
                         <span class="snapshot-label">AI 신뢰도</span>
                         <strong>{{ result.report.overall_score }}</strong>
                         <p>{{ result.report.overall_level }}</p>
                     </div>
                     <div class="snapshot-card">
-                        <span class="snapshot-label">대표 판독</span>
+                        <span class="snapshot-label">분석 결과</span>
                         <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
                         <p>{{ result.analysis.pytorch_confidence }}% 확률</p>
                     </div>
-                    <div class="snapshot-card">
+                    <div class="snapshot-card snapshot-photo-card">
                         <span class="snapshot-label">업로드 사진</span>
-                        <strong>{{ result.filename }}</strong>
-                        <p>{{ result.content_type }}</p>
+                        {% if result.uploaded_preview %}
+                        <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 사진" class="snapshot-photo">
+                        {% else %}
+                        <p class="snapshot-empty">사진을 불러올 수 없습니다.</p>
+                        {% endif %}
                     </div>
                 </div>
             </article>
 
             <aside class="hero-summary report-side">
                 <div class="summary-panel">
-                    <span class="panel-kicker">상위 판독 결과</span>
+                    <span class="panel-kicker">상위 결과</span>
                     <div class="priority-list">
                         {% for concern in result.report.top_concerns %}
                         <div class="priority-item">
@@ -70,41 +73,27 @@
             </aside>
         </section>
 
-        <section class="report-grid">
-            <article class="report-card report-card-wide">
-                <div class="report-card-head">
-                    <h2>맞춤 안내</h2>
-                    <span class="badge-pill">AI 결과 + 설문 반영</span>
-                </div>
-                <div class="advice-stream">
-                    {% for advice in result.advice %}
-                    <div class="advice-card">{{ advice }}</div>
-                    {% endfor %}
-                </div>
-            </article>
-
-            <article class="report-card">
-                <div class="report-card-head">
-                    <h2>추천 제품</h2>
-                    <span class="badge-pill">공식 사이트 연결</span>
-                </div>
-                <div class="product-grid">
-                    {% for item in result.report.product_recommendations %}
-                    <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
-                        <div class="product-image-wrap">
-                            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
-                        </div>
-                        <div class="product-copy">
-                            <span class="product-step">{{ item.step }}</span>
-                            <strong>{{ item.name }}</strong>
-                            <p>{{ item.summary }}</p>
-                            <span class="product-meta">{{ item.brand }} · {{ item.price }}</span>
-                            <span class="product-why">{{ item.why }}</span>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
-            </article>
+        <section class="report-card">
+            <div class="report-card-head">
+                <h2>추천 제품</h2>
+                <span class="badge-pill">공식 사이트 연결</span>
+            </div>
+            <div class="product-grid">
+                {% for item in result.report.product_recommendations %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
+                    <div class="product-image-wrap">
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
+                    </div>
+                    <div class="product-copy">
+                        <span class="product-step">{{ item.step }}</span>
+                        <strong>{{ item.name }}</strong>
+                        <p>{{ item.summary }}</p>
+                        <span class="product-meta">{{ item.brand }} · {{ item.price }}</span>
+                        <span class="product-why">{{ item.why }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
         </section>
 
         <section class="report-card">
@@ -112,7 +101,7 @@
                 <h2>클래스별 AI 점수</h2>
                 <span class="badge-pill">.pth 분류 결과</span>
             </div>
-            <div class="metric-grid">
+            <div class="metric-grid metric-grid-readable">
                 {% for card in result.report.condition_cards %}
                 <article class="metric-box">
                     <div class="metric-top">
