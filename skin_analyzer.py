@@ -546,7 +546,131 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         evening.append(f"{product_map['soothing_cream']['name']}로 보습막을 마무리합니다.")
 
     morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
-    return {"morning": morning[:5], "evening": evening[:5]}
+
+    routine_steps: List[Dict[str, str]] = [
+        {
+            "period": "아침",
+            "title": "1. 세안",
+            "description": "가볍게 노폐물을 정리합니다.",
+            "product_name": product_map["cleanser"]["name"],
+            "product_url": product_map["cleanser"]["url"],
+            "product_image_url": product_map["cleanser"]["image_url"],
+        },
+        {
+            "period": "아침",
+            "title": "2. 토너",
+            "description": "피부결을 편안하게 정돈합니다.",
+            "product_name": product_map["soothing_toner"]["name"],
+            "product_url": product_map["soothing_toner"]["url"],
+            "product_image_url": product_map["soothing_toner"]["image_url"],
+        },
+    ]
+
+    if "moisture_ampoule" in product_map:
+        routine_steps.append(
+            {
+                "period": "아침",
+                "title": "3. 수분 앰플",
+                "description": "산뜻하게 수분을 채워줍니다.",
+                "product_name": product_map["moisture_ampoule"]["name"],
+                "product_url": product_map["moisture_ampoule"]["url"],
+                "product_image_url": product_map["moisture_ampoule"]["image_url"],
+            }
+        )
+
+    if "soothing_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "아침",
+                "title": "4. 보습 크림",
+                "description": "건조함이 남지 않도록 마무리합니다.",
+                "product_name": product_map["soothing_cream"]["name"],
+                "product_url": product_map["soothing_cream"]["url"],
+                "product_image_url": product_map["soothing_cream"]["image_url"],
+            }
+        )
+
+    routine_steps.append(
+        {
+            "period": "아침",
+            "title": "5. 선케어",
+            "description": "외출 전 피부를 보호합니다.",
+            "product_name": product_map["sunscreen"]["name"],
+            "product_url": product_map["sunscreen"]["url"],
+            "product_image_url": product_map["sunscreen"]["image_url"],
+        }
+    )
+
+    routine_steps.append(
+        {
+            "period": "저녁",
+            "title": "6. 클렌징",
+            "description": "메이크업과 노폐물을 정리합니다.",
+            "product_name": product_map["cleanser"]["name"],
+            "product_url": product_map["cleanser"]["url"],
+            "product_image_url": product_map["cleanser"]["image_url"],
+        }
+    )
+    routine_steps.append(
+        {
+            "period": "저녁",
+            "title": "7. 진정 토너",
+            "description": "피부를 차분하게 정돈합니다.",
+            "product_name": product_map["soothing_toner"]["name"],
+            "product_url": product_map["soothing_toner"]["url"],
+            "product_image_url": product_map["soothing_toner"]["image_url"],
+        }
+    )
+
+    if "blemish_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "8. 트러블 케어",
+                "description": "고민 부위에 가볍게 사용합니다.",
+                "product_name": product_map["blemish_cream"]["name"],
+                "product_url": product_map["blemish_cream"]["url"],
+                "product_image_url": product_map["blemish_cream"]["image_url"],
+            }
+        )
+
+    if "retinol" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "9. 탄력 케어",
+                "description": "밤 시간에 집중적으로 관리합니다.",
+                "product_name": product_map["retinol"]["name"],
+                "product_url": product_map["retinol"]["url"],
+                "product_image_url": product_map["retinol"]["image_url"],
+            }
+        )
+
+    if "moisture_ampoule" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "10. 수분 보충",
+                "description": "충분히 레이어링해 마무리합니다.",
+                "product_name": product_map["moisture_ampoule"]["name"],
+                "product_url": product_map["moisture_ampoule"]["url"],
+                "product_image_url": product_map["moisture_ampoule"]["image_url"],
+            }
+        )
+
+    if "soothing_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "11. 보습 마감",
+                "description": "잠들기 전 보습막을 더합니다.",
+                "product_name": product_map["soothing_cream"]["name"],
+                "product_url": product_map["soothing_cream"]["url"],
+                "product_image_url": product_map["soothing_cream"]["image_url"],
+            }
+        )
+
+    return {"morning": morning[:5], "evening": evening[:5], "steps": routine_steps}
 
 
 def build_pytorch_advice(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[str]:

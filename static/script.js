@@ -86,3 +86,46 @@ if (analysisForm && submitButton) {
 
 questionNames.forEach((name) => updateOptionState(name));
 updateProgress();
+
+const routineSlides = document.querySelectorAll("[data-routine-slide]");
+const routinePrev = document.getElementById("routinePrev");
+const routineNext = document.getElementById("routineNext");
+const routineCounter = document.getElementById("routineCounter");
+
+if (routineSlides.length > 0) {
+    let activeRoutineIndex = 0;
+
+    const renderRoutineSlide = () => {
+        routineSlides.forEach((slide, index) => {
+            slide.classList.toggle("is-active", index === activeRoutineIndex);
+        });
+
+        if (routineCounter) {
+            routineCounter.textContent = `${activeRoutineIndex + 1} / ${routineSlides.length}`;
+        }
+
+        if (routinePrev) {
+            routinePrev.disabled = activeRoutineIndex === 0;
+        }
+
+        if (routineNext) {
+            routineNext.disabled = activeRoutineIndex === routineSlides.length - 1;
+        }
+    };
+
+    routinePrev?.addEventListener("click", () => {
+        if (activeRoutineIndex > 0) {
+            activeRoutineIndex -= 1;
+            renderRoutineSlide();
+        }
+    });
+
+    routineNext?.addEventListener("click", () => {
+        if (activeRoutineIndex < routineSlides.length - 1) {
+            activeRoutineIndex += 1;
+            renderRoutineSlide();
+        }
+    });
+
+    renderRoutineSlide();
+}
