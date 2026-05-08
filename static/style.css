@@ -641,6 +641,10 @@ input[type="file"] {
     gap: 20px;
 }
 
+.routine-stack {
+    grid-template-columns: 1fr;
+}
+
 .report-card-wide {
     grid-column: span 1;
 }

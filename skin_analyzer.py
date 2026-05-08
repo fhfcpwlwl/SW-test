@@ -604,7 +604,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
     routine_steps.append(
         {
             "period": "저녁",
-            "title": "6. 클렌징",
+            "title": "1. 클렌징",
             "description": "메이크업과 노폐물을 정리합니다.",
             "product_name": product_map["cleanser"]["name"],
             "product_url": product_map["cleanser"]["url"],
@@ -614,7 +614,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
     routine_steps.append(
         {
             "period": "저녁",
-            "title": "7. 진정 토너",
+            "title": "2. 진정 토너",
             "description": "피부를 차분하게 정돈합니다.",
             "product_name": product_map["soothing_toner"]["name"],
             "product_url": product_map["soothing_toner"]["url"],
@@ -626,7 +626,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         routine_steps.append(
             {
                 "period": "저녁",
-                "title": "8. 트러블 케어",
+                "title": "3. 트러블 케어",
                 "description": "고민 부위에 가볍게 사용합니다.",
                 "product_name": product_map["blemish_cream"]["name"],
                 "product_url": product_map["blemish_cream"]["url"],
@@ -638,7 +638,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         routine_steps.append(
             {
                 "period": "저녁",
-                "title": "9. 탄력 케어",
+                "title": "4. 탄력 케어",
                 "description": "밤 시간에 집중적으로 관리합니다.",
                 "product_name": product_map["retinol"]["name"],
                 "product_url": product_map["retinol"]["url"],
@@ -650,7 +650,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         routine_steps.append(
             {
                 "period": "저녁",
-                "title": "10. 수분 보충",
+                "title": "5. 수분 보충",
                 "description": "충분히 레이어링해 마무리합니다.",
                 "product_name": product_map["moisture_ampoule"]["name"],
                 "product_url": product_map["moisture_ampoule"]["url"],
@@ -662,13 +662,20 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         routine_steps.append(
             {
                 "period": "저녁",
-                "title": "11. 보습 마감",
+                "title": "6. 보습 마감",
                 "description": "잠들기 전 보습막을 더합니다.",
                 "product_name": product_map["soothing_cream"]["name"],
                 "product_url": product_map["soothing_cream"]["url"],
                 "product_image_url": product_map["soothing_cream"]["image_url"],
             }
         )
+
+    period_counters = {"아침": 0, "저녁": 0}
+    for step in routine_steps:
+        period = step["period"]
+        period_counters[period] += 1
+        title_body = step["title"].split(". ", 1)[1] if ". " in step["title"] else step["title"]
+        step["title"] = f"{period_counters[period]}. {title_body}"
 
     return {"morning": morning[:5], "evening": evening[:5], "steps": routine_steps}
 

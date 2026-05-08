@@ -96,7 +96,7 @@
         {% set morning_steps = result.report.routine.steps | selectattr('period', 'equalto', '아침') | list %}
         {% set evening_steps = result.report.routine.steps | selectattr('period', 'equalto', '저녁') | list %}
 
-        <section class="report-grid">
+        <section class="report-grid routine-stack">
             <article class="report-card routine-showcase">
                 <div class="report-card-head">
                     <h2>아침 루틴</h2>
