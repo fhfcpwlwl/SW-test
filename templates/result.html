@@ -3,105 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin Lab 분석 결과</title>
+    <title>피부 분석 결과</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="theme-report">
     <div class="page-shell">
-        <header class="site-header report-header">
-            <a href="/" class="brand-mark">
-                <span class="brand-orb"></span>
-                <span class="brand-copy">
-                    <strong>Skin Lab</strong>
-                    <span>AI 피부 분석</span>
-                </span>
-            </a>
-            <a href="/" class="ghost-link">새 분석</a>
-        </header>
+        <section class="report-hero glass-card">
+            <div class="hero-copy">
+                <span class="eyebrow">Skin Report</span>
+                <h1>{{ result.skin_mbti.code }} 피부 리포트</h1>
+                <p class="hero-text">{{ result.report.summary }}</p>
 
-        <section class="report-hero">
-            <article class="hero-stage hero-stage-report">
-                <div class="hero-copy">
-                    <span class="eyebrow">분석 결과</span>
-                    <h1>{{ result.skin_mbti.code }} 분석 결과</h1>
-                    <p class="hero-text">{{ result.report.summary }}</p>
+                <div class="summary-strip">
+                    <div class="summary-chip">
+                        <strong>분석 기준</strong>
+                        <span>사진 + 피부 MBTI 설문</span>
+                    </div>
+                    <div class="summary-chip">
+                        <strong>파일명</strong>
+                        <span>{{ result.filename }}</span>
+                    </div>
+                    <div class="summary-chip">
+                        <strong>현재 상태</strong>
+                        <span>{{ result.report.overall_level }}</span>
+                    </div>
                 </div>
+            </div>
 
-                <div class="report-snapshot report-snapshot-compact">
-                    <div class="snapshot-card snapshot-score">
-                        <span class="snapshot-label">AI 신뢰도</span>
-                        <strong>{{ result.report.overall_score }}</strong>
-                        <p>{{ result.report.overall_level }}</p>
-                    </div>
-                    <div class="snapshot-card">
-                        <span class="snapshot-label">분석 결과</span>
-                        <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
-                        <p>{{ result.analysis.pytorch_confidence }}% 확률</p>
-                    </div>
-                    <div class="snapshot-card snapshot-photo-card">
-                        <span class="snapshot-label">업로드 사진</span>
-                        {% if result.uploaded_preview %}
-                        <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 사진" class="snapshot-photo">
-                        {% else %}
-                        <p class="snapshot-empty">사진을 불러올 수 없습니다.</p>
-                        {% endif %}
-                    </div>
+            <aside class="score-stage">
+                <div class="score-ring">
+                    <strong>{{ result.report.overall_score }}</strong>
+                    <span>종합 점수</span>
                 </div>
-            </article>
-
-            <aside class="hero-summary report-side">
-                <div class="summary-panel">
-                    <span class="panel-kicker">상위 결과</span>
-                    <div class="priority-list">
-                        {% for concern in result.report.top_concerns %}
-                        <div class="priority-item">
-                            <strong>{{ concern.label }}</strong>
-                            <span>{{ concern.score }}점</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="summary-panel soft">
-                    <span class="panel-kicker">설문 성향</span>
-                    <div class="mbti-grid">
-                        <div><strong>건성/지성</strong><span>{{ result.skin_mbti.dry_oily.label }}</span></div>
-                        <div><strong>민감/저항성</strong><span>{{ result.skin_mbti.sensitive_resistant.label }}</span></div>
-                        <div><strong>색소형</strong><span>{{ result.skin_mbti.pigmented_nonpigmented.label }}</span></div>
-                        <div><strong>주름형</strong><span>{{ result.skin_mbti.wrinkled_tight.label }}</span></div>
-                    </div>
-                </div>
+                <p>현재 피부 상태를 기준으로 우선 관리가 필요한 영역을 정리한 결과입니다.</p>
             </aside>
         </section>
 
-        <section class="report-card">
-            <div class="report-card-head">
-                <h2>추천 제품</h2>
-                <span class="badge-pill">공식 사이트 연결</span>
-            </div>
-            <div class="product-grid">
-                {% for item in result.report.product_recommendations %}
-                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
-                    <div class="product-image-wrap">
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
-                    </div>
-                    <div class="product-copy">
-                        <span class="product-step">{{ item.step }}</span>
-                        <strong>{{ item.name }}</strong>
-                        <p>{{ item.summary }}</p>
-                        <span class="product-meta">{{ item.brand }} · {{ item.price }}</span>
-                        <span class="product-why">{{ item.why }}</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
+        <section class="report-overview">
+            <article class="glass-card panel-card">
+                <div class="panel-title-row">
+                    <h2>기본 프로필</h2>
+                    <span class="badge-pill">기본 정보</span>
+                </div>
+                <div class="profile-list">
+                    <div class="info-row"><strong>예상 나이</strong><span>{{ result.analysis.age }}</span></div>
+                    <div class="info-row"><strong>예상 성별</strong><span>{{ result.analysis.gender }}</span></div>
+                    <div class="info-row"><strong>파일 형식</strong><span>{{ result.content_type }}</span></div>
+                    <div class="info-row"><strong>건성/지성</strong><span>{{ result.skin_mbti.dry_oily.label }}</span></div>
+                    <div class="info-row"><strong>민감/저항성</strong><span>{{ result.skin_mbti.sensitive_resistant.label }}</span></div>
+                    <div class="info-row"><strong>색소형/비색소형</strong><span>{{ result.skin_mbti.pigmented_nonpigmented.label }}</span></div>
+                    <div class="info-row"><strong>주름형/탄력형</strong><span>{{ result.skin_mbti.wrinkled_tight.label }}</span></div>
+                </div>
+            </article>
+
+            <article class="glass-card panel-card">
+                <div class="panel-title-row">
+                    <h2>우선 관리 포인트</h2>
+                    <span class="badge-pill">핵심 고민</span>
+                </div>
+                <div class="chip-list">
+                    {% for concern in result.report.top_concerns %}
+                    <span class="metric-chip">{{ concern.label }} {{ concern.score }}점</span>
+                    {% endfor %}
+                </div>
+                <div class="advice-list">
+                    {% for advice in result.advice %}
+                    <div class="soft-block">{{ advice }}</div>
+                    {% endfor %}
+                </div>
+            </article>
         </section>
 
-        <section class="report-card">
-            <div class="report-card-head">
-                <h2>클래스별 AI 점수</h2>
-                <span class="badge-pill">AI 분석 결과</span>
+        <section class="glass-card panel-card">
+            <div class="panel-title-row">
+                <h2>세부 피부 분석</h2>
+                <span class="badge-pill">조건별 카드</span>
             </div>
-            <div class="metric-grid metric-grid-readable">
+            <div class="metric-grid">
                 {% for card in result.report.condition_cards %}
                 <article class="metric-box">
                     <div class="metric-top">
@@ -110,42 +88,58 @@
                     </div>
                     <div class="metric-score">{{ card.score }}</div>
                     <p>{{ card.description }}</p>
-                    <div class="focus-line">{{ card.focus_area }}</div>
+                    <div class="focus-line">집중 부위: {{ card.focus_area }}</div>
                 </article>
                 {% endfor %}
             </div>
         </section>
 
-        <section class="report-grid">
-            <article class="report-card">
-                <div class="report-card-head">
-                    <h2>아침 루틴</h2>
-                    <span class="badge-pill">출근 전 관리</span>
+        <section class="report-overview">
+            <article class="glass-card panel-card">
+                <div class="panel-title-row">
+                    <h2>추천 제품 카테고리</h2>
+                    <span class="badge-pill">제품 방향</span>
                 </div>
-                <ol class="routine-list">
-                    {% for step in result.report.routine.morning %}
-                    <li>{{ step }}</li>
+                <div class="stack-list">
+                    {% for item in result.report.product_recommendations %}
+                    <div class="soft-block">
+                        <strong>{{ item.category }}: {{ item.product_type }}</strong>
+                        <p>{{ item.why }}</p>
+                    </div>
                     {% endfor %}
-                </ol>
+                </div>
             </article>
 
-            <article class="report-card">
-                <div class="report-card-head">
-                    <h2>저녁 루틴</h2>
-                    <span class="badge-pill">귀가 후 관리</span>
+            <article class="glass-card panel-card">
+                <div class="panel-title-row">
+                    <h2>추천 스킨케어 루틴</h2>
+                    <span class="badge-pill">아침 / 저녁</span>
                 </div>
-                <ol class="routine-list">
-                    {% for step in result.report.routine.evening %}
-                    <li>{{ step }}</li>
-                    {% endfor %}
-                </ol>
+                <div class="routine-grid">
+                    <div class="soft-block">
+                        <strong>아침 루틴</strong>
+                        <ul>
+                            {% for step in result.report.routine.morning %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="soft-block">
+                        <strong>저녁 루틴</strong>
+                        <ul>
+                            {% for step in result.report.routine.evening %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </article>
         </section>
 
-        <footer class="report-footer">
+        <section class="glass-card footer-panel">
             <p>{{ result.report.disclaimer }}</p>
             <a href="/" class="primary-link">다시 분석하기</a>
-        </footer>
+        </section>
     </div>
 </body>
 </html>
