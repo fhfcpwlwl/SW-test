@@ -12,6 +12,7 @@ from config import (
     SKIN_ADVICE,
     TARGET_IMAGE_SIZE,
 )
+from hyafilia_products import PRODUCTS
 from logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -328,88 +329,80 @@ def build_condition_cards(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     ]
 
 
-def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Generate MBTI-aware product category suggestions."""
+def _copy_product(key: str) -> Dict[str, str]:
+    """Return a copy of an official product definition."""
+    return dict(PRODUCTS[key])
+
+
+def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Select official Hyafilia USA products only."""
     code = skin_mbti.get("code", "????")
-    recommendations: List[Dict[str, Any]] = [
-        {
-            "category": "\uD074\uB80C\uC800",
-            "product_type": "\uC57D\uC0B0\uC131 \uC824 \uD074\uB80C\uC800" if code.startswith("D") else "\uC800\uC790\uADF9 \uC57D\uC0B0\uC131 \uD3FC \uD074\uB80C\uC800",
-            "why": "\uC138\uC548 \uD6C4 \uB2F9\uAE40\uC744 \uC904\uC774\uBA74\uC11C \uC7A5\uBCBD\uC744 \uB35C \uC790\uADF9\uD558\uB294 \uBCA0\uC774\uC2A4\uAC00 \uC88B\uC2B5\uB2C8\uB2E4."
-            if code.startswith("D")
-            else "\uACFC\uD55C \uD53C\uC9C0 \uC81C\uAC70 \uC5C6\uC774 \uBAA8\uACF5 \uBD80\uD558\uB97C \uB0AE\uCD94\uB294 \uC138\uC815\uB825\uC774 \uC911\uC694\uD569\uB2C8\uB2E4.",
-        }
+    recommendations: List[Dict[str, str]] = [
+        _copy_product("cleanser"),
+        _copy_product("soothing_toner"),
     ]
 
-    if metrics["redness"] >= 45 or "S" in code:
-        recommendations.append(
-            {
-                "category": "\uC9C4\uC815 \uC138\uB7FC",
-                "product_type": "\uD310\uD14C\uB180\u00B7\uC2DC\uCE74\u00B7\uC54C\uB780\uD1A0\uC778 \uACC4\uC5F4",
-                "why": "\uBD89\uC740\uAE30\uC640 \uC790\uADF9 \uC2E0\uD638\uAC00 \uBCF4\uC5EC \uC7A5\uBCBD \uC9C4\uC815 \uC911\uC2EC\uC758 \uC138\uB7FC\uC774 \uC798 \uB9DE\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    needs_acne = metrics["acne_inflamed"] >= 45 or metrics["acne_noninflamed"] >= 45 or code.startswith("O")
+    needs_wrinkle = metrics["wrinkle"] >= 45 or metrics["sagging"] >= 45 or code.endswith("W")
+    needs_dryness = code.startswith("D") or skin_mbti.get("sensitive_resistant", {}).get("code") == "S" or metrics["skin_scores"]["health"] < 55
+    needs_pigment = metrics["pigmentation"] >= 40 or "P" in code
 
-    if metrics["pores"] >= 50 or metrics["acne_noninflamed"] >= 45 or code.startswith("O"):
-        recommendations.append(
-            {
-                "category": "\uBAA8\uACF5/\uAC01\uC9C8 \uCF00\uC5B4",
-                "product_type": "BHA \uB610\uB294 PHA \uD1A0\uB108/\uC138\uB7FC",
-                "why": "\uB098\uBE44\uC874 \uBAA8\uACF5\uACFC \uBA74\uD3EC\uC131 \uD2B8\uB7EC\uBE14 \uC644\uD654\uC5D0 \uB3C4\uC6C0\uB418\uB294 \uC800\uAC15\uB3C4 \uAC01\uC9C8 \uCF00\uC5B4\uAC00 \uC801\uD569\uD569\uB2C8\uB2E4.",
-            }
-        )
+    if needs_acne:
+        recommendations.append(_copy_product("blemish_cream"))
+    elif needs_wrinkle or needs_pigment:
+        recommendations.append(_copy_product("retinol"))
+    else:
+        recommendations.append(_copy_product("moisture_ampoule"))
 
-    if metrics["pigmentation"] >= 40 or "P" in code:
-        recommendations.append(
-            {
-                "category": "\uBE0C\uB77C\uC774\uD2B8\uB2DD \uC138\uB7FC",
-                "product_type": "\uB098\uC774\uC544\uC2E0\uC544\uB9C8\uC774\uB4DC\u00B7\uD2B8\uB77C\uB125\uC0BC\uC0B0\u00B7\uBE44\uD0C0\uBBFCCC \uC720\uB3C4\uCCB4",
-                "why": "\uC7A1\uD2F0\uC640 \uC5FC\uC99D \uD6C4 \uD754\uC801 \uC644\uD654\uB97C \uC704\uD574 \uD1A4 \uBCF4\uC815 \uC131\uBD84\uC744 \uD568\uAED8 \uC4F0\uB294 \uD3B8\uC774 \uC88B\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    if needs_dryness:
+        recommendations.append(_copy_product("soothing_cream"))
+    elif not needs_acne:
+        recommendations.append(_copy_product("moisture_ampoule"))
 
-    if metrics["wrinkle"] >= 45 or metrics["sagging"] >= 45 or code.endswith("W"):
-        recommendations.append(
-            {
-                "category": "\uD0C4\uB825 \uCF00\uC5B4",
-                "product_type": "\uB808\uD2F0\uB180 \uB300\uCCB4\uCCB4 \uB610\uB294 \uD39D\uD0C0\uC774\uB4DC \uD06C\uB9BC",
-                "why": "\uC774\uB9C8, \uB208\uAC00, \uD314\uC790 \uBD80\uC704\uC758 \uD0C4\uB825 \uC800\uD558 \uC2E0\uD638\uAC00 \uBCF4\uC5EC \uC548\uD2F0\uC5D0\uC774\uC9D5 \uCD95\uC744 \uCD94\uAC00\uD558\uB294 \uAC83\uC774 \uC88B\uC2B5\uB2C8\uB2E4.",
-            }
-        )
+    recommendations.append(_copy_product("sunscreen"))
 
-    recommendations.append(
-        {
-            "category": "\uC120\uCF00\uC5B4",
-            "product_type": "SPF50+ PA++++ \uC790\uC678\uC120 \uCC28\uB2E8\uC81C",
-            "why": "\uBD89\uC740\uAE30, \uC0C9\uC18C\uCE68\uCC29, \uD0C4\uB825 \uC800\uD558\uB97C \uB3D9\uC2DC\uC5D0 \uC545\uD654\uC2DC\uD0A4\uB294 \uC790\uC678\uC120 \uAD00\uB9AC\uAC00 \uD544\uC218\uC785\uB2C8\uB2E4.",
-        }
-    )
-    return recommendations[:5]
+    unique_products: List[Dict[str, str]] = []
+    seen: set[str] = set()
+    for product in recommendations:
+        if product["key"] in seen:
+            continue
+        seen.add(product["key"])
+        unique_products.append(product)
+
+    return unique_products
 
 
-def build_routine(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> Dict[str, List[str]]:
-    """Build a simple skincare routine."""
+def build_routine(metrics: Dict[str, Any], skin_mbti: Dict[str, Any], products: List[Dict[str, str]]) -> Dict[str, List[str]]:
+    """Build a routine that references only official Hyafilia USA products."""
+    product_map = {product["key"]: product for product in products}
+
     morning = [
-        "\uC800\uC790\uADF9 \uD074\uB80C\uC800\uB85C \uAC00\uBCD1\uAC8C \uC138\uC548\uD569\uB2C8\uB2E4.",
-        "\uC9C4\uC815 \uB610\uB294 \uC218\uBD84 \uD1A0\uB108\uB85C \uD53C\uBD80 \uACB0\uC744 \uC815\uB3C8\uD569\uB2C8\uB2E4.",
-        "\uD604\uC7AC \uACE0\uBBFC\uC5D0 \uB9DE\uB294 \uAE30\uB2A5\uC131 \uC138\uB7FC\uC744 1\uAC00\uC9C0 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        "\uBCF4\uC2B5 \uD06C\uB9BC\uC73C\uB85C \uC720\uC218\uBD84 \uBC38\uB7F0\uC2A4\uB97C \uB9DE\uCDA5\uB2C8\uB2E4.",
-        "SPF50+ \uC120\uD06C\uB9BC\uC73C\uB85C \uB9C8\uBB34\uB9AC\uD569\uB2C8\uB2E4.",
-    ]
-    evening = [
-        "\uC120\uD06C\uB9BC\uACFC \uB178\uD3D0\uBB3C\uC744 \uBD80\uB4DC\uB7FD\uAC8C \uC138\uC815\uD569\uB2C8\uB2E4.",
-        "\uBAA8\uACF5/\uD2B8\uB7EC\uBE14\uC774 \uACE0\uBBFC\uC774\uBA74 \uC8FC 2~3\uD68C \uAC01\uC9C8 \uCF00\uC5B4\uB97C \uCD94\uAC00\uD569\uB2C8\uB2E4.",
-        "\uC0C9\uC18C \uB610\uB294 \uD0C4\uB825 \uACE0\uBBFC\uC5D0 \uB9DE\uB294 \uAE30\uB2A5\uC131 \uC138\uB7FC\uC744 \uC0AC\uC6A9\uD569\uB2C8\uB2E4.",
-        "\uC7A5\uBCBD \uD06C\uB9BC\uC73C\uB85C \uB9C8\uBB34\uB9AC\uD558\uACE0, \uAC74\uC131 \uACBD\uD5A5\uC774\uBA74 \uC218\uBA74\uD329\uC744 \uAC00\uBCD1\uAC8C \uB367\uBC1C\uB77C\uC90D\uB2C8\uB2E4.",
+        f"세안은 {product_map['cleanser']['name']}로 가볍게 시작합니다.",
+        f"피부 결 정돈은 {product_map['soothing_toner']['name']}로 진행합니다.",
     ]
 
-    if skin_mbti.get("dry_oily", {}).get("code") == "D":
-        morning[1] = "\uC218\uBD84 \uC5D0\uC13C\uC2A4 \uB610\uB294 \uD1A0\uB108\uB97C \uCDA9\uBD84\uD788 \uB808\uC774\uC5B4\uB9C1\uD569\uB2C8\uB2E4."
-        evening[-1] = "\uC138\uB77C\uB9C8\uC774\uB4DC\u00B7\uCF5C\uB808\uC2A4\uD14C\uB864 \uACC4\uC5F4 \uD06C\uB9BC\uC73C\uB85C \uC218\uBD84 \uC190\uC2E4\uC744 \uB9C9\uC544\uC90D\uB2C8\uB2E4."
-    if skin_mbti.get("sensitive_resistant", {}).get("code") == "S":
-        evening[1] = "\uAC01\uC9C8 \uCF00\uC5B4\uB294 \uC8FC 1~2\uD68C \uC800\uAC15\uB3C4\uB85C \uC2DC\uC791\uD558\uACE0 \uC790\uADF9 \uBC18\uC751\uC744 \uD655\uC778\uD569\uB2C8\uB2E4."
-    if metrics["acne_inflamed"] >= 50:
-        evening.insert(2, "\uC5FC\uC99D\uC131 \uD2B8\uB7EC\uBE14 \uBD80\uC704\uC5D0\uB294 \uC2A4\uD33F \uCF00\uC5B4\uB97C \uAD6D\uC18C\uC801\uC73C\uB85C \uC0AC\uC6A9\uD569\uB2C8\uB2E4.")
+    evening = [
+        f"저녁 세안은 {product_map['cleanser']['name']}로 부드럽게 마무리합니다.",
+        f"세안 후 {product_map['soothing_toner']['name']}로 피부를 진정시키고 다음 단계를 준비합니다.",
+    ]
+
+    if "moisture_ampoule" in product_map:
+        morning.append(f"수분 보충이 필요하면 {product_map['moisture_ampoule']['name']}를 얇게 레이어링합니다.")
+        evening.append(f"건조함이 느껴지는 날에는 {product_map['moisture_ampoule']['name']}를 충분히 사용합니다.")
+
+    if "blemish_cream" in product_map:
+        morning.append(f"트러블 관리가 필요한 부위에는 {product_map['blemish_cream']['name']}를 소량 사용합니다.")
+        evening.append(f"트러블 진정 단계로 {product_map['blemish_cream']['name']}를 집중 사용합니다.")
+
+    if "retinol" in product_map:
+        evening.append(f"탄력과 결 케어를 위해 밤에는 {product_map['retinol']['name']}를 소량 사용합니다.")
+
+    if "soothing_cream" in product_map:
+        evening.append(f"마지막 보습막은 {product_map['soothing_cream']['name']}로 정리합니다.")
+        morning.append(f"건조하거나 예민한 날 아침에는 {product_map['soothing_cream']['name']}를 얇게 덧발라 줍니다.")
+
+    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+
     return {"morning": morning[:5], "evening": evening[:5]}
 
 
@@ -445,14 +438,16 @@ def build_personalized_report(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]
         f"{top_concerns[0]['label']}, {top_concerns[1]['label']}, {top_concerns[2]['label']}\uC785\uB2C8\uB2E4."
     )
 
+    products = build_product_recommendations(metrics, skin_mbti)
+
     return {
         "overall_score": overall_score,
         "overall_level": overall_level,
         "summary": summary,
         "top_concerns": top_concerns,
         "condition_cards": cards,
-        "product_recommendations": build_product_recommendations(metrics, skin_mbti),
-        "routine": build_routine(metrics, skin_mbti),
+        "product_recommendations": products,
+        "routine": build_routine(metrics, skin_mbti, products),
         "disclaimer": "\uC774 \uACB0\uACFC\uB294 \uC0AC\uC9C4 \uAE30\uBC18 \uCC38\uACE0\uC6A9 \uBD84\uC11D\uC774\uBA70, \uD53C\uBD80 \uC9C8\uD658\uC774 \uC758\uC2EC\uB418\uBA74 \uC804\uBB38 \uC9C4\uB8CC\uAC00 \uC6B0\uC120\uC785\uB2C8\uB2E4.",
     }
 
@@ -463,3 +458,280 @@ def analyze_image(image_path: str) -> dict:
     result = analyzer.analyze_image(image_path)
     logger.debug("Returned analysis result for %s", image_path)
     return result
+
+
+def ensure_face_image(image_path: str) -> None:
+    """Validate that the uploaded image contains a face before AI inference."""
+    analyzer = SkinAnalyzer()
+    if not analyzer.detect_face(image_path):
+        raise ValueError("정면 얼굴 사진을 다시 업로드해 주세요.")
+
+
+def _copy_products_by_keys(product_keys: List[str]) -> List[Dict[str, str]]:
+    """Return official product definitions while preserving order and uniqueness."""
+    seen: set[str] = set()
+    selected: List[Dict[str, str]] = []
+    for key in product_keys:
+        if key in seen:
+            continue
+        seen.add(key)
+        selected.append(_copy_product(key))
+    return selected
+
+
+def build_pytorch_product_recommendations(skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
+    """Build product recommendations from the questionnaire while keeping image analysis AI-only."""
+    code = skin_mbti.get("code", "????")
+    keys = ["cleanser", "soothing_toner"]
+
+    if code.startswith("D"):
+        keys.extend(["moisture_ampoule", "soothing_cream"])
+    else:
+        keys.extend(["blemish_cream", "moisture_ampoule"])
+
+    if "W" in code or "P" in code:
+        keys.append("retinol")
+
+    keys.append("sunscreen")
+    return _copy_products_by_keys(keys)
+
+
+def build_pytorch_condition_cards(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Turn PyTorch class scores into explainable result cards."""
+    class_scores = analysis.get("pytorch_class_scores", {})
+    if not class_scores:
+        return []
+
+    cards: List[Dict[str, Any]] = []
+    for label, score in sorted(class_scores.items(), key=lambda item: item[1], reverse=True):
+        score_value = clamp_score(score)
+        cards.append(
+            {
+                "key": label,
+                "label": label,
+                "score": score_value,
+                "level": score_to_level(score_value),
+                "focus_area": "AI 분석 결과",
+                "description": f"AI가 이 클래스로 판단한 확률입니다. 현재 점수는 {score_value}점입니다.",
+            }
+        )
+    return cards
+
+
+def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]]:
+    """Build a simple routine around the selected official products."""
+    product_map = {product["key"]: product for product in products}
+
+    morning = [
+        f"{product_map['cleanser']['name']}로 세안을 시작합니다.",
+        f"{product_map['soothing_toner']['name']}로 피부 결을 정돈합니다.",
+    ]
+    evening = [
+        f"{product_map['cleanser']['name']}로 메이크업과 노폐물을 정리합니다.",
+        f"{product_map['soothing_toner']['name']}로 피부를 편안하게 진정시킵니다.",
+    ]
+
+    if "moisture_ampoule" in product_map:
+        morning.append(f"{product_map['moisture_ampoule']['name']}로 수분을 채워줍니다.")
+        evening.append(f"{product_map['moisture_ampoule']['name']}를 충분히 레이어링합니다.")
+
+    if "blemish_cream" in product_map:
+        evening.append(f"트러블 부위에는 {product_map['blemish_cream']['name']}를 가볍게 사용합니다.")
+
+    if "retinol" in product_map:
+        evening.append(f"탄력 관리가 필요할 때 {product_map['retinol']['name']}를 밤 루틴에 추가합니다.")
+
+    if "soothing_cream" in product_map:
+        morning.append(f"건조함이 느껴지면 {product_map['soothing_cream']['name']}로 마무리합니다.")
+        evening.append(f"{product_map['soothing_cream']['name']}로 보습막을 마무리합니다.")
+
+    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+
+    routine_steps: List[Dict[str, str]] = [
+        {
+            "period": "아침",
+            "title": "1. 세안",
+            "description": "가볍게 노폐물을 정리합니다.",
+            "product_name": product_map["cleanser"]["name"],
+            "product_url": product_map["cleanser"]["url"],
+            "product_image_url": product_map["cleanser"]["image_url"],
+        },
+        {
+            "period": "아침",
+            "title": "2. 토너",
+            "description": "피부결을 편안하게 정돈합니다.",
+            "product_name": product_map["soothing_toner"]["name"],
+            "product_url": product_map["soothing_toner"]["url"],
+            "product_image_url": product_map["soothing_toner"]["image_url"],
+        },
+    ]
+
+    if "moisture_ampoule" in product_map:
+        routine_steps.append(
+            {
+                "period": "아침",
+                "title": "3. 수분 앰플",
+                "description": "산뜻하게 수분을 채워줍니다.",
+                "product_name": product_map["moisture_ampoule"]["name"],
+                "product_url": product_map["moisture_ampoule"]["url"],
+                "product_image_url": product_map["moisture_ampoule"]["image_url"],
+            }
+        )
+
+    if "soothing_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "아침",
+                "title": "4. 보습 크림",
+                "description": "건조함이 남지 않도록 마무리합니다.",
+                "product_name": product_map["soothing_cream"]["name"],
+                "product_url": product_map["soothing_cream"]["url"],
+                "product_image_url": product_map["soothing_cream"]["image_url"],
+            }
+        )
+
+    routine_steps.append(
+        {
+            "period": "아침",
+            "title": "5. 선케어",
+            "description": "외출 전 피부를 보호합니다.",
+            "product_name": product_map["sunscreen"]["name"],
+            "product_url": product_map["sunscreen"]["url"],
+            "product_image_url": product_map["sunscreen"]["image_url"],
+        }
+    )
+
+    routine_steps.append(
+        {
+            "period": "저녁",
+            "title": "1. 클렌징",
+            "description": "메이크업과 노폐물을 정리합니다.",
+            "product_name": product_map["cleanser"]["name"],
+            "product_url": product_map["cleanser"]["url"],
+            "product_image_url": product_map["cleanser"]["image_url"],
+        }
+    )
+    routine_steps.append(
+        {
+            "period": "저녁",
+            "title": "2. 진정 토너",
+            "description": "피부를 차분하게 정돈합니다.",
+            "product_name": product_map["soothing_toner"]["name"],
+            "product_url": product_map["soothing_toner"]["url"],
+            "product_image_url": product_map["soothing_toner"]["image_url"],
+        }
+    )
+
+    if "blemish_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "3. 트러블 케어",
+                "description": "고민 부위에 가볍게 사용합니다.",
+                "product_name": product_map["blemish_cream"]["name"],
+                "product_url": product_map["blemish_cream"]["url"],
+                "product_image_url": product_map["blemish_cream"]["image_url"],
+            }
+        )
+
+    if "retinol" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "4. 탄력 케어",
+                "description": "밤 시간에 집중적으로 관리합니다.",
+                "product_name": product_map["retinol"]["name"],
+                "product_url": product_map["retinol"]["url"],
+                "product_image_url": product_map["retinol"]["image_url"],
+            }
+        )
+
+    if "moisture_ampoule" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "5. 수분 보충",
+                "description": "충분히 레이어링해 마무리합니다.",
+                "product_name": product_map["moisture_ampoule"]["name"],
+                "product_url": product_map["moisture_ampoule"]["url"],
+                "product_image_url": product_map["moisture_ampoule"]["image_url"],
+            }
+        )
+
+    if "soothing_cream" in product_map:
+        routine_steps.append(
+            {
+                "period": "저녁",
+                "title": "6. 보습 마감",
+                "description": "잠들기 전 보습막을 더합니다.",
+                "product_name": product_map["soothing_cream"]["name"],
+                "product_url": product_map["soothing_cream"]["url"],
+                "product_image_url": product_map["soothing_cream"]["image_url"],
+            }
+        )
+
+    period_counters = {"아침": 0, "저녁": 0}
+    for step in routine_steps:
+        period = step["period"]
+        period_counters[period] += 1
+        title_body = step["title"].split(". ", 1)[1] if ". " in step["title"] else step["title"]
+        step["title"] = f"{period_counters[period]}. {title_body}"
+
+    return {"morning": morning[:5], "evening": evening[:5], "steps": routine_steps}
+
+
+def build_pytorch_advice(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[str]:
+    """Build short guidance lines from the .pth result and questionnaire."""
+    predicted_class = analysis.get("pytorch_predicted_class", "unknown")
+    confidence = round(float(analysis.get("pytorch_confidence", 0)), 2)
+    code = skin_mbti.get("code", "????")
+
+    advice = [
+        f"AI 분석 결과 이번 사진은 {predicted_class} 패턴으로 {confidence}% 신뢰도로 분류되었습니다.",
+        "결과는 사진 분석과 설문 응답을 바탕으로 정리되었습니다.",
+    ]
+
+    if confidence < 60:
+        advice.append("정면 사진과 밝은 조명으로 다시 촬영하면 더 안정적인 결과를 볼 수 있습니다.")
+
+    if code.startswith("D"):
+        advice.append("설문상 건조 성향이 보여 수분 앰플과 보습 크림 중심 루틴을 권장합니다.")
+    elif code.startswith("O"):
+        advice.append("설문상 유분 성향이 보여 가벼운 진정 케어와 트러블 관리 제품을 우선 추천합니다.")
+
+    if "W" in code or "P" in code:
+        advice.append("탄력 또는 색소 고민 응답이 있어 야간 기능성 케어를 함께 제안합니다.")
+
+    return advice
+
+
+def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> Dict[str, Any]:
+    """Create a report payload driven by the .pth model output."""
+    predicted_class = analysis.get("pytorch_predicted_class", "unknown")
+    confidence = clamp_score(float(analysis.get("pytorch_confidence", 0)))
+    cards = build_pytorch_condition_cards(analysis)
+    top_concerns = cards[:3]
+    products = build_pytorch_product_recommendations(skin_mbti)
+
+    if confidence >= 80:
+        overall_level = "판독 신뢰 높음"
+    elif confidence >= 60:
+        overall_level = "판독 완료"
+    else:
+        overall_level = "재촬영 권장"
+
+    summary = (
+        f"AI가 이번 사진을 {predicted_class} 클래스로 분류했습니다. "
+        f"현재 신뢰도는 {confidence}점이며, 설문 코드 {skin_mbti.get('code', '????')}를 함께 반영해 루틴을 구성했습니다."
+    )
+
+    return {
+        "overall_score": confidence,
+        "overall_level": overall_level,
+        "summary": summary,
+        "top_concerns": top_concerns,
+        "condition_cards": cards,
+        "product_recommendations": products,
+        "routine": build_pytorch_routine(products),
+        "disclaimer": "이 결과는 사진 분석과 설문 응답을 바탕으로 한 참고용 안내입니다.",
+    }

@@ -19,6 +19,34 @@ for directory in [MODEL_DIR, UPLOAD_DIR, DATA_DIR, IMAGE_DIR, LOGS_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
 MODEL_PATH = MODEL_DIR / "skin_model.h5"
+
+
+def _default_pytorch_model_path() -> Path:
+    """Resolve a sensible default location for the external .pth file."""
+    configured = os.getenv("PYTORCH_MODEL_PATH")
+    if configured:
+        return Path(configured)
+
+    home = Path.home()
+    candidates = [
+        home / "OneDrive" / "Desktop" / "skin_model_best.pth",
+        home / "OneDrive" / "바탕 화면" / "skin_model_best.pth",
+        home / "Desktop" / "skin_model_best.pth",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    return candidates[0]
+
+
+PYTORCH_MODEL_PATH = _default_pytorch_model_path()
+PYTORCH_MODEL_ENABLED = os.getenv("PYTORCH_MODEL_ENABLED", "True").lower() == "true"
+PYTORCH_MODEL_LABELS = [
+    label.strip()
+    for label in os.getenv("PYTORCH_MODEL_LABELS", "여드름,정상 피부").split(",")
+    if label.strip()
+]
 MODEL_INPUT_SHAPE = (
     int(os.getenv("MODEL_INPUT_HEIGHT", "224")),
     int(os.getenv("MODEL_INPUT_WIDTH", "224")),

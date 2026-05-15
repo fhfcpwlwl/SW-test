@@ -101,7 +101,8 @@ def load_model(path: str = str(MODEL_PATH)) -> 'tf.keras.Model':
         raise FileNotFoundError(f"Model not found: {path}")
     
     try:
-        model = tf.keras.models.load_model(path)
+        # Inference does not require training-time optimizer/metric state.
+        model = tf.keras.models.load_model(path, compile=False)
         logger.info(f"Model loaded: {path}")
         return model
     except Exception as e:

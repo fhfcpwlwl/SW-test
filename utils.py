@@ -31,7 +31,7 @@ def validate_file_upload(filename: str, file_size: Optional[int] = None) -> tupl
 def sanitize_filename(filename: str) -> str:
     """Sanitize filename for safer filesystem usage."""
     sanitized = os.path.basename(filename)
-    for char in ['<', '>', ':', '"', '/', '\\', '|', '?', '*']:
+    for char in ['<', '>', ':', '"', "/", "\\", "|", "?", "*"]:
         sanitized = sanitized.replace(char, "_")
     return sanitized
 
