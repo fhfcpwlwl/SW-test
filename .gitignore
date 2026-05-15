@@ -1,12 +1,22 @@
-# Ignore everything
-/*
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
-# Keep Git metadata and ignore file
-!.gitignore
+.env
 
-# Keep only static and templates folders
-!static/
-!static/**
-!templates/
-!templates/**
+logs/
+uploads/
+static/uploads/
 
+model/
+*.h5
+
+data/images/
+data/labels.csv
+
+*.log
+
+.DS_Store
+Thumbs.db
