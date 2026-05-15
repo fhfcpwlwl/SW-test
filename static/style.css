@@ -739,3 +739,374 @@ ol {
         width: 100%;
     }
 }
+
+/* Result report: clean Skin Lab layout */
+.top-strip {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    background: #111511;
+    color: #f6ffe9;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.site-header {
+    width: min(var(--max), calc(100% - 32px));
+    min-height: 68px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    border-bottom: 1px solid rgba(197, 210, 186, 0.65);
+}
+
+.site-header .brand-mark {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #6eb43f;
+    color: #fff;
+    box-shadow: none;
+    font-weight: 900;
+}
+
+.brand-symbol {
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #6eb43f;
+    color: #fff;
+    font-weight: 900;
+}
+
+.site-header .brand-mark {
+    width: auto;
+    height: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-header .brand-mark strong,
+.site-header .brand-mark small {
+    display: block;
+}
+
+.site-header .brand-mark strong {
+    font-size: 1.12rem;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+}
+
+.site-header .brand-mark small {
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.header-button {
+    padding: 11px 16px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.page-shell {
+    width: min(var(--max), calc(100% - 32px));
+    margin: 18px auto 56px;
+}
+
+.result-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 18px;
+}
+
+.result-title,
+.result-score,
+.content-card,
+.snapshot-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+.result-title,
+.content-card {
+    padding: 24px;
+}
+
+.result-title {
+    min-height: 220px;
+    display: grid;
+    align-content: center;
+    gap: 18px;
+}
+
+.result-title h1 {
+    max-width: 700px;
+    font-size: clamp(2.35rem, 5vw, 4.4rem);
+    line-height: 0.98;
+    font-weight: 900;
+    letter-spacing: -0.045em;
+}
+
+.result-score {
+    min-height: 220px;
+    display: grid;
+    place-items: center;
+    gap: 4px;
+    background: linear-gradient(145deg, #d9ef74, #6eb43f);
+    color: #14200d;
+    text-align: center;
+}
+
+.result-score span,
+.result-score small {
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.result-score strong {
+    font-size: clamp(4rem, 9vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: -0.08em;
+}
+
+.snapshot-grid,
+.routine-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.routine-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.snapshot-card {
+    min-height: 140px;
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    padding: 22px;
+}
+
+.card-label,
+.step-label {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    color: #2f6f22;
+    font-size: 0.74rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.photo-card img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.metric-grid,
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metric-card,
+.product-card {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fbfcf8;
+}
+
+.metric-card.compact span,
+.metric-value {
+    color: #2f6f22;
+    font-size: 1.7rem;
+    font-weight: 900;
+    letter-spacing: -0.06em;
+}
+
+.metric-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.metric-top span,
+.metric-card small {
+    color: #2f6f22;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.routine-list {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+    list-style: none;
+    counter-reset: routine;
+}
+
+.routine-list li {
+    counter-increment: routine;
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 12px;
+    align-items: start;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--surface-soft);
+    color: #405039;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.routine-list li::before {
+    content: counter(routine);
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #6eb43f;
+    color: white;
+    font-weight: 900;
+}
+
+.product-card {
+    color: inherit;
+    text-decoration: none;
+    background: #fff;
+}
+
+.product-card:hover {
+    border-color: #6eb43f;
+}
+
+.product-image-wrap {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-soft);
+}
+
+.product-image-wrap img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+.product-copy {
+    display: grid;
+    gap: 7px;
+}
+
+.product-copy span,
+.product-copy small {
+    color: #2f6f22;
+    font-size: 0.82rem;
+    font-weight: 900;
+}
+
+.advice-list {
+    display: grid;
+    gap: 10px;
+}
+
+.advice-list p {
+    padding: 14px;
+    border-radius: 10px;
+    background: var(--surface-soft);
+}
+
+.report-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+    margin-top: 18px;
+    padding: 18px 20px;
+}
+
+@media (max-width: 1040px) {
+    .result-hero,
+    .snapshot-grid,
+    .routine-grid,
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .metric-grid,
+    .detail-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .site-header,
+    .section-head,
+    .report-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .page-shell {
+        width: min(var(--max), calc(100% - 24px));
+    }
+
+    .result-title,
+    .content-card {
+        padding: 20px;
+    }
+
+    .metric-grid,
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
