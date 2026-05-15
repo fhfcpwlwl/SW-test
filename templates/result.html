@@ -3,187 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin Lab 분석 결과</title>
+    <title>SkinGuard AI Report</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="theme-report">
-    <div class="page-shell">
-        <header class="site-header report-header">
-            <a href="/" class="brand-mark">
-                <span class="brand-orb"></span>
-                <span class="brand-copy">
-                    <strong>Skin Lab</strong>
-                    <span>AI 피부 분석</span>
-                </span>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="/">
+                <span class="brand-mark"></span>
+                <span>SkinGuard AI</span>
             </a>
-            <a href="/" class="ghost-link">새 분석</a>
+            <a class="ghost-link" href="/">새 분석</a>
         </header>
 
-        <section class="report-hero">
-            <article class="hero-stage hero-stage-report">
-                <div class="hero-copy">
-                    <span class="eyebrow">분석 결과</span>
-                    <h1>{{ result.skin_mbti.code }} 분석 결과</h1>
-                    <p class="hero-text">{{ result.report.summary }}</p>
-                </div>
+        <section class="report-header">
+            <div>
+                <p class="eyebrow">AI Personal Report</p>
+                <h1>피부 리포트</h1>
+                <p class="hero-text">{{ result.report.summary }}</p>
+            </div>
+            <aside class="score-panel">
+                <span>현재 방향</span>
+                <strong>{{ result.report.overall_score }}</strong>
+                <em>{{ result.report.overall_level }}</em>
+            </aside>
+        </section>
 
-                <div class="report-snapshot report-snapshot-compact">
-                    <div class="snapshot-card snapshot-score">
-                        <span class="snapshot-label">AI 신뢰도</span>
-                        <strong>{{ result.report.overall_score }}</strong>
-                        <p>{{ result.report.overall_level }}</p>
+        <section class="insight-grid">
+            <article class="summary-panel">
+                <h2>분석 정보</h2>
+                <div class="info-list">
+                    <div><span>분석 방식</span><strong>사진 기반 AI 판독</strong></div>
+                    <div><span>파일명</span><strong>{{ result.filename }}</strong></div>
+                    <div><span>건성/지성</span><strong>{{ result.skin_mbti.dry_oily.label }}</strong></div>
+                    <div><span>민감/저항</span><strong>{{ result.skin_mbti.sensitive_resistant.label }}</strong></div>
+                    <div><span>색소 경향</span><strong>{{ result.skin_mbti.pigmented_nonpigmented.label }}</strong></div>
+                    <div><span>탄력 경향</span><strong>{{ result.skin_mbti.wrinkled_tight.label }}</strong></div>
+                </div>
+            </article>
+
+            <article class="summary-panel">
+                <h2>AI 판독 결과</h2>
+                <div class="ai-verdict">
+                    <div>
+                        <span>여드름</span>
+                        <strong>{{ result.analysis.model_concern_score|default("-") }}</strong>
                     </div>
-                    <div class="snapshot-card">
-                        <span class="snapshot-label">분석 결과</span>
-                        <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
-                        <p>{{ result.analysis.pytorch_confidence }}% 확률</p>
-                    </div>
-                    <div class="snapshot-card snapshot-photo-card">
-                        <span class="snapshot-label">업로드 사진</span>
-                        {% if result.uploaded_preview %}
-                        <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 사진" class="snapshot-photo">
-                        {% else %}
-                        <p class="snapshot-empty">사진을 불러올 수 없습니다.</p>
-                        {% endif %}
+                    <div>
+                        <span>정상 피부</span>
+                        <strong>{{ result.analysis.model_normal_score|default("-") }}</strong>
                     </div>
                 </div>
             </article>
 
-            <aside class="hero-summary report-side">
-                <div class="summary-panel">
-                    <span class="panel-kicker">AI 분석 먼저 보기</span>
-                    <div class="priority-list">
-                        {% for concern in result.report.top_concerns %}
-                        <div class="priority-item">
-                            <strong>{{ concern.label }}</strong>
-                            <span>{{ concern.score }}점</span>
-                        </div>
-                        {% endfor %}
-                    </div>
+            <article class="summary-panel">
+                <h2>해석 요약</h2>
+                <div class="chip-list">
+                    {% for concern in result.report.top_concerns %}
+                    <span>{{ concern.label }} {{ concern.score }}</span>
+                    {% endfor %}
                 </div>
-                <div class="summary-panel soft">
-                    <span class="panel-kicker">설문 성향</span>
-                    <div class="mbti-grid">
-                        <div><strong>건성/지성</strong><span>{{ result.skin_mbti.dry_oily.label }}</span></div>
-                        <div><strong>민감/저항성</strong><span>{{ result.skin_mbti.sensitive_resistant.label }}</span></div>
-                        <div><strong>색소형</strong><span>{{ result.skin_mbti.pigmented_nonpigmented.label }}</span></div>
-                        <div><strong>주름형</strong><span>{{ result.skin_mbti.wrinkled_tight.label }}</span></div>
-                    </div>
+                <div class="advice-list">
+                    {% for advice in result.advice %}
+                    <p>{{ advice }}</p>
+                    {% endfor %}
                 </div>
-            </aside>
+            </article>
         </section>
 
-        <section class="report-card">
-            <div class="report-card-head">
-                <h2>AI 분석</h2>
-                <span class="badge-pill">먼저 확인하는 결과</span>
+        <section class="metrics-section">
+            <div class="section-heading">
+                <p class="step-label">AI Reading</p>
+                <h2>사진 판독 점수</h2>
+                <p>업로드한 사진을 바탕으로 여드름과 정상 피부 방향을 각각 확인한 결과입니다.</p>
             </div>
-            <div class="metric-grid metric-grid-readable">
+            <div class="metric-grid">
                 {% for card in result.report.condition_cards %}
-                <article class="metric-box">
-                    <div class="metric-top">
+                <article class="metric-card">
+                    <div class="metric-card-head">
                         <strong>{{ card.label }}</strong>
-                        <span class="level-pill">{{ card.level }}</span>
+                        <span>{{ card.level }}</span>
                     </div>
-                    <div class="metric-score">{{ card.score }}</div>
+                    <div class="meter">
+                        <i style="width: {{ card.score }}%"></i>
+                    </div>
+                    <div class="metric-value">{{ card.score }}</div>
                     <p>{{ card.description }}</p>
-                    <div class="focus-line">{{ card.focus_area }}</div>
+                    <small>{{ card.focus_area }}</small>
                 </article>
                 {% endfor %}
             </div>
         </section>
 
-        {% set morning_steps = result.report.routine.steps | selectattr('period', 'equalto', '아침') | list %}
-        {% set evening_steps = result.report.routine.steps | selectattr('period', 'equalto', '저녁') | list %}
-
-        <section class="report-grid routine-stack">
-            <article class="report-card routine-showcase">
-                <div class="report-card-head">
-                    <h2>아침 루틴</h2>
-                    <span class="badge-pill">아침 단계별 보기</span>
-                </div>
-                <div class="routine-slider" data-routine-slider>
-                    <button type="button" class="routine-nav routine-nav-prev" data-routine-prev aria-label="이전 아침 루틴">&larr;</button>
-                    <div class="routine-stage">
-                        {% for step in morning_steps %}
-                        <article class="routine-slide{% if loop.first %} is-active{% endif %}" data-routine-slide>
-                            <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-media">
-                                <img src="{{ step.product_image_url }}" alt="{{ step.product_name }}" class="routine-image">
-                            </a>
-                            <div class="routine-copy">
-                                <span class="routine-period">{{ step.period }}</span>
-                                <strong>{{ step.title }}</strong>
-                                <p>{{ step.description }}</p>
-                                <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-product-link">{{ step.product_name }}</a>
-                            </div>
-                        </article>
-                        {% endfor %}
+        <section class="plan-grid">
+            <article class="summary-panel">
+                <h2>추천 제품 카테고리</h2>
+                <div class="recommend-list">
+                    {% for item in result.report.product_recommendations %}
+                    <div>
+                        <strong>{{ item.category }}</strong>
+                        <span>{{ item.product_type }}</span>
+                        <p>{{ item.why }}</p>
                     </div>
-                    <button type="button" class="routine-nav routine-nav-next" data-routine-next aria-label="다음 아침 루틴">&rarr;</button>
-                </div>
-                <div class="routine-progress">
-                    <span data-routine-counter>1 / {{ morning_steps|length }}</span>
+                    {% endfor %}
                 </div>
             </article>
 
-            <article class="report-card routine-showcase">
-                <div class="report-card-head">
-                    <h2>저녁 루틴</h2>
-                    <span class="badge-pill">저녁 단계별 보기</span>
-                </div>
-                <div class="routine-slider" data-routine-slider>
-                    <button type="button" class="routine-nav routine-nav-prev" data-routine-prev aria-label="이전 저녁 루틴">&larr;</button>
-                    <div class="routine-stage">
-                        {% for step in evening_steps %}
-                        <article class="routine-slide{% if loop.first %} is-active{% endif %}" data-routine-slide>
-                            <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-media">
-                                <img src="{{ step.product_image_url }}" alt="{{ step.product_name }}" class="routine-image">
-                            </a>
-                            <div class="routine-copy">
-                                <span class="routine-period">{{ step.period }}</span>
-                                <strong>{{ step.title }}</strong>
-                                <p>{{ step.description }}</p>
-                                <a href="{{ step.product_url }}" target="_blank" rel="noopener noreferrer" class="routine-product-link">{{ step.product_name }}</a>
-                            </div>
-                        </article>
-                        {% endfor %}
+            <article class="summary-panel">
+                <h2>추천 루틴</h2>
+                <div class="routine-columns">
+                    <div>
+                        <strong>아침</strong>
+                        <ol>
+                            {% for step in result.report.routine.morning %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ol>
                     </div>
-                    <button type="button" class="routine-nav routine-nav-next" data-routine-next aria-label="다음 저녁 루틴">&rarr;</button>
-                </div>
-                <div class="routine-progress">
-                    <span data-routine-counter>1 / {{ evening_steps|length }}</span>
+                    <div>
+                        <strong>저녁</strong>
+                        <ol>
+                            {% for step in result.report.routine.evening %}
+                            <li>{{ step }}</li>
+                            {% endfor %}
+                        </ol>
+                    </div>
                 </div>
             </article>
-        </section>
-
-        <section class="report-card">
-            <div class="report-card-head">
-                <h2>추천 제품</h2>
-                <span class="badge-pill">공식 사이트 연결</span>
-            </div>
-            <div class="product-grid">
-                {% for item in result.report.product_recommendations %}
-                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
-                    <div class="product-image-wrap">
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="product-image">
-                    </div>
-                    <div class="product-copy">
-                        <span class="product-step">{{ item.step }}</span>
-                        <strong>{{ item.name }}</strong>
-                        <p>{{ item.summary }}</p>
-                        <span class="product-meta">{{ item.brand }} · {{ item.price }}</span>
-                        <span class="product-why">{{ item.why }}</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
         </section>
 
         <footer class="report-footer">
             <p>{{ result.report.disclaimer }}</p>
-            <a href="/" class="primary-link">다시 분석하기</a>
+            <a class="primary-link" href="/">다시 분석하기</a>
         </footer>
-    </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    </main>
 </body>
 </html>

@@ -6,266 +6,169 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Skin Lab</title>
+    <title>SkinGuard AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="theme-landing">
-    <div class="page-shell">
-        {% if error %}
-        <div class="alert-banner">{{ error }}</div>
-        {% endif %}
-
-        <header class="site-header">
-            <a href="/" class="brand-mark">
-                <span class="brand-orb"></span>
-                <span class="brand-copy">
-                    <strong>Skin Lab</strong>
-                    <span>사진 분석 기반 피부 결과</span>
-                </span>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="/">
+                <span class="brand-mark"></span>
+                <span>SkinGuard AI</span>
             </a>
-            <div class="header-note">정면 사진과 간단한 설문만으로 맞춤 리포트를 만듭니다</div>
+            <div class="status-pill">
+                <span></span>
+                Local AI Ready
+            </div>
         </header>
 
-        <section class="landing-hero">
-            <article class="hero-stage">
-                <div class="hero-copy">
-                    <span class="eyebrow">피부 분석</span>
-                    <h1>피부 분석</h1>
-                    <p class="hero-text">
-                        얼굴 사진과 간단한 설문을 바탕으로 현재 피부 상태, 우선 관리 포인트,
-                        추천 제품 방향, 아침과 저녁 루틴까지 한 번에 정리해 드립니다.
-                    </p>
-                </div>
+        {% if error %}
+        <section class="alert-banner">{{ error }}</section>
+        {% endif %}
 
-                <div class="hero-preview">
-                    <div class="preview-card preview-card-main">
-                        <span class="preview-label">결과 미리보기</span>
-                        <strong>지금 먼저 볼 포인트</strong>
-                        <p>주름, 모공, 붉은기, 색소침착 같은 지표를 우선순위 중심으로 보여드립니다.</p>
+        <section class="hero-band">
+            <div class="hero-copy">
+                <p class="eyebrow">AI Skin Analysis</p>
+                <h1>사진과 피부 타입을 함께 읽는 맞춤 스킨 리포트</h1>
+                <p class="hero-text">
+                    정면 얼굴 사진과 간단한 피부 문진을 바탕으로 주요 고민, 관리 우선순위,
+                    추천 루틴을 한 화면에서 확인하세요.
+                </p>
+            </div>
+            <div class="hero-visual" aria-hidden="true">
+                <div class="face-card">
+                    <div class="face-preview">
+                        <div class="scan-line"></div>
                     </div>
-                    <div class="preview-stack">
-                        <div class="preview-card">
-                            <span class="preview-label">관리 루틴</span>
-                            <strong>아침 / 저녁 루틴</strong>
-                            <p>바로 따라 하기 쉬운 순서로 정리해 드립니다.</p>
-                        </div>
-                        <div class="preview-card">
-                            <span class="preview-label">추천 방향</span>
-                            <strong>제품 선택 가이드</strong>
-                            <p>무엇을 고르면 좋을지 피부 상태에 맞춰 방향을 알려드립니다.</p>
-                        </div>
+                    <div class="mini-metrics">
+                        <span>Moisture</span>
+                        <strong>82</strong>
+                        <span>Trouble</span>
+                        <strong>24</strong>
                     </div>
                 </div>
-            </article>
-
-            <aside class="hero-summary">
-                <div class="summary-panel">
-                    <span class="panel-kicker">이용 순서</span>
-                    <ol class="summary-steps">
-                        <li>얼굴 사진 업로드</li>
-                        <li>피부 MBTI 설문 응답</li>
-                        <li>개인화 결과 확인</li>
-                    </ol>
-                </div>
-                <div class="summary-panel soft">
-                    <span class="panel-kicker">촬영 팁</span>
-                    <p>자연광에서 찍은 정면 얼굴 사진일수록 결과가 더 안정적으로 나옵니다.</p>
-                </div>
-            </aside>
+            </div>
         </section>
 
-        <form action="/analyze" method="post" enctype="multipart/form-data" class="analysis-form" id="analysisForm">
-            <aside class="form-side">
-                <div class="sticky-panel">
-                    <span class="eyebrow">진행 상태</span>
-                    <h2>분석 준비 상태</h2>
-                    <div class="progress-block">
-                        <div class="progress-meta">
-                            <strong id="progressCount">0 / 12</strong>
-                            <span>설문 응답 완료</span>
-                        </div>
-                        <div class="progress-track" aria-hidden="true">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                    </div>
-
-                    <div class="side-checklist">
-                        <div class="check-item">
-                            <strong>사진 업로드</strong>
-                            <span id="fileStatus">아직 선택되지 않았습니다.</span>
-                        </div>
-                        <div class="check-item">
-                            <strong>권장 사진</strong>
-                            <span>정면, 무보정, 그림자 적은 사진</span>
-                        </div>
-                        <div class="check-item">
-                            <strong>결과 구성</strong>
-                            <span>점수, 관리 포인트, 제품 방향, 루틴</span>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="primary-button primary-button-wide" id="submitButton">피부 결과 보기</button>
+        <form id="analysisForm" action="/analyze" method="post" enctype="multipart/form-data" class="workspace">
+            <section class="upload-panel">
+                <div class="section-heading">
+                    <p class="step-label">Step 1</p>
+                    <h2>얼굴 사진 업로드</h2>
+                    <p>정면 얼굴, 자연광 또는 밝은 실내 조명, 과한 보정이 없는 사진이 가장 좋습니다.</p>
                 </div>
-            </aside>
 
-            <div class="form-main">
-                <section class="form-card feature-card">
-                    <div class="section-head">
-                        <div>
-                            <span class="section-step">Step 1</span>
-                            <h2>얼굴 사진 업로드</h2>
-                            <p>정면 얼굴 사진을 올려 주세요. 강한 필터, 마스크, 선글라스는 분석 정확도를 낮출 수 있습니다.</p>
-                        </div>
-                        <span class="badge-pill">정면 얼굴 권장</span>
+                <label class="dropzone" for="photo">
+                    <input type="file" id="photo" name="photo" accept="image/*" required>
+                    <span class="upload-icon">+</span>
+                    <strong>사진 선택</strong>
+                    <span id="selectedFileName">JPG, PNG, WEBP 파일을 업로드하세요.</span>
+                </label>
+
+                <div class="preview-wrap">
+                    <img id="imagePreview" alt="선택한 사진 미리보기">
+                    <div id="previewEmpty" class="preview-empty">
+                        <span></span>
+                        <p>미리보기</p>
                     </div>
+                </div>
+            </section>
 
-                    <label class="upload-dropzone" for="photo">
-                        <span class="upload-title">사진 추가하기</span>
-                        <span class="upload-guide">JPG, PNG, WEBP 형식 이미지를 업로드할 수 있습니다.</span>
-                        <span class="upload-file" id="selectedFileName">선택된 파일이 없습니다.</span>
-                        <input type="file" id="photo" name="photo" accept="image/*" required>
-                    </label>
+            <section class="survey-panel">
+                <div class="section-heading">
+                    <p class="step-label">Step 2</p>
+                    <h2>피부 타입 문진</h2>
+                    <p>선택값은 사진 분석 결과를 해석하고 루틴을 추천하는 데 함께 사용됩니다.</p>
+                </div>
 
-                    <div class="tip-grid">
-                        <div class="tip-box">눈, 코, 입 윤곽이 또렷할수록 분석이 안정적입니다.</div>
-                        <div class="tip-box">한쪽으로 치우친 그림자보다 균일한 조명이 더 좋습니다.</div>
-                    </div>
-                </section>
+                <div class="question-stack">
+                    <fieldset class="question-group">
+                        <legend>건성 vs 지성</legend>
+                        <div class="question-block">
+                            <p>세안 후 아무것도 바르지 않으면?</p>
+                            <label><input type="radio" name="dry_oily_1" value="A" required><span>당기고 건조하다</span></label>
+                            <label><input type="radio" name="dry_oily_1" value="B"><span>금방 번들거린다</span></label>
+                        </div>
+                        <div class="question-block">
+                            <p>오후 피부 상태는?</p>
+                            <label><input type="radio" name="dry_oily_2" value="A"><span>푸석하고 건조하다</span></label>
+                            <label><input type="radio" name="dry_oily_2" value="B"><span>유분이 많이 올라온다</span></label>
+                        </div>
+                        <div class="question-block">
+                            <p>모공은 주로 어떻게 보이나요?</p>
+                            <label><input type="radio" name="dry_oily_3" value="A"><span>크게 눈에 띄지 않는다</span></label>
+                            <label><input type="radio" name="dry_oily_3" value="B"><span>T존과 볼에 잘 보인다</span></label>
+                        </div>
+                    </fieldset>
 
-                <section class="form-card question-card">
-                    <div class="section-head">
-                        <div>
-                            <span class="section-step">Step 2</span>
-                            <h2>피부 MBTI 설문</h2>
-                            <p>현재 피부 상태뿐 아니라 평소 반응 성향까지 함께 반영하기 위한 짧은 설문입니다.</p>
+                    <fieldset class="question-group">
+                        <legend>민감성 vs 저항성</legend>
+                        <div class="question-block">
+                            <p>화장품을 바꾸면 자극이 생기나요?</p>
+                            <label><input type="radio" name="sensitive_resistant_1" value="A" required><span>자주 생긴다</span></label>
+                            <label><input type="radio" name="sensitive_resistant_1" value="B"><span>거의 없다</span></label>
                         </div>
-                        <span class="badge-pill">총 12문항</span>
-                    </div>
+                        <div class="question-block">
+                            <p>피부가 쉽게 붉어지는 편인가요?</p>
+                            <label><input type="radio" name="sensitive_resistant_2" value="A"><span>그렇다</span></label>
+                            <label><input type="radio" name="sensitive_resistant_2" value="B"><span>아니다</span></label>
+                        </div>
+                        <div class="question-block">
+                            <p>가려움이나 따가움이 있나요?</p>
+                            <label><input type="radio" name="sensitive_resistant_3" value="A"><span>자주 있다</span></label>
+                            <label><input type="radio" name="sensitive_resistant_3" value="B"><span>거의 없다</span></label>
+                        </div>
+                    </fieldset>
 
-                    <div class="question-section">
-                        <div class="question-section-head">
-                            <h3>건성 vs 지성</h3>
-                            <p>세안 직후와 오후 피부 변화를 떠올리며 답해 주세요.</p>
+                    <fieldset class="question-group">
+                        <legend>색소형 vs 비색소형</legend>
+                        <div class="question-block">
+                            <p>기미나 잡티가 잘 생기나요?</p>
+                            <label><input type="radio" name="pigmented_nonpigmented_1" value="A" required><span>잘 생긴다</span></label>
+                            <label><input type="radio" name="pigmented_nonpigmented_1" value="B"><span>거의 없다</span></label>
                         </div>
-                        <div class="question-list">
-                            <div class="question-block">
-                                <strong>세안 후 아무것도 바르지 않으면?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="dry_oily_1" value="A" required>당기고 건조해진다</label>
-                                    <label class="option-card"><input type="radio" name="dry_oily_1" value="B">금방 번들거린다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>오후가 되면 피부 상태는?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="dry_oily_2" value="A">푸석하고 건조하다</label>
-                                    <label class="option-card"><input type="radio" name="dry_oily_2" value="B">유분이 많이 올라온다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>모공은 주로 어디에 잘 보이나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="dry_oily_3" value="A">크게 눈에 띄지 않는다</label>
-                                    <label class="option-card"><input type="radio" name="dry_oily_3" value="B">T존과 볼에 잘 보인다</label>
-                                </div>
-                            </div>
+                        <div class="question-block">
+                            <p>햇빛을 받으면 색소침착이 남나요?</p>
+                            <label><input type="radio" name="pigmented_nonpigmented_2" value="A"><span>오래 남는다</span></label>
+                            <label><input type="radio" name="pigmented_nonpigmented_2" value="B"><span>금방 돌아온다</span></label>
                         </div>
-                    </div>
+                        <div class="question-block">
+                            <p>여드름 자국이 오래 가나요?</p>
+                            <label><input type="radio" name="pigmented_nonpigmented_3" value="A"><span>오래 남는다</span></label>
+                            <label><input type="radio" name="pigmented_nonpigmented_3" value="B"><span>비교적 빨리 옅어진다</span></label>
+                        </div>
+                    </fieldset>
 
-                    <div class="question-section">
-                        <div class="question-section-head">
-                            <h3>민감 vs 저항성</h3>
-                            <p>자극, 붉은기, 가려움처럼 피부가 반응하는 모습을 기준으로 답해 주세요.</p>
+                    <fieldset class="question-group">
+                        <legend>주름형 vs 탄력형</legend>
+                        <div class="question-block">
+                            <p>표정 주름이 눈에 띄나요?</p>
+                            <label><input type="radio" name="wrinkled_tight_1" value="A" required><span>눈에 띈다</span></label>
+                            <label><input type="radio" name="wrinkled_tight_1" value="B"><span>거의 없다</span></label>
                         </div>
-                        <div class="question-list">
-                            <div class="question-block">
-                                <strong>화장품을 바꾸면 자극이 있나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_1" value="A" required>자주 있다</label>
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_1" value="B">거의 없다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>피부가 쉽게 붉어지는 편인가요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_2" value="A">그렇다</label>
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_2" value="B">아니다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>가려움이나 따가움이 자주 있나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_3" value="A">자주 있다</label>
-                                    <label class="option-card"><input type="radio" name="sensitive_resistant_3" value="B">거의 없다</label>
-                                </div>
-                            </div>
+                        <div class="question-block">
+                            <p>피부 탄력은 어떤가요?</p>
+                            <label><input type="radio" name="wrinkled_tight_2" value="A"><span>부족한 편이다</span></label>
+                            <label><input type="radio" name="wrinkled_tight_2" value="B"><span>비교적 좋다</span></label>
                         </div>
-                    </div>
+                        <div class="question-block">
+                            <p>자외선 노출이 많은 편인가요?</p>
+                            <label><input type="radio" name="wrinkled_tight_3" value="A" required><span>많다</span></label>
+                            <label><input type="radio" name="wrinkled_tight_3" value="B"><span>적다</span></label>
+                        </div>
+                    </fieldset>
+                </div>
+            </section>
 
-                    <div class="question-section">
-                        <div class="question-section-head">
-                            <h3>색소형 vs 비색소형</h3>
-                            <p>잡티와 자국이 남는 편인지 평소 경향을 기준으로 답해 주세요.</p>
-                        </div>
-                        <div class="question-list">
-                            <div class="question-block">
-                                <strong>기미나 잡티가 쉽게 생기나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_1" value="A" required>잘 생긴다</label>
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_1" value="B">거의 없다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>햇빛을 받으면 색소침착이 잘 남나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_2" value="A">쉽게 남는다</label>
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_2" value="B">금방 돌아온다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>여드름 자국이 오래 가나요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_3" value="A">오래 남는다</label>
-                                    <label class="option-card"><input type="radio" name="pigmented_nonpigmented_3" value="B">비교적 빨리 옅어진다</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="question-section">
-                        <div class="question-section-head">
-                            <h3>주름형 vs 탄력형</h3>
-                            <p>주름, 탄력, 자외선 노출 습관을 떠올리며 답해 주세요.</p>
-                        </div>
-                        <div class="question-list">
-                            <div class="question-block">
-                                <strong>표정 주름이 눈에 띄는 편인가요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_1" value="A" required>눈에 띈다</label>
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_1" value="B">거의 없다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>피부 탄력은 어떤 편인가요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_2" value="A">탄력이 부족하다</label>
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_2" value="B">탄력이 비교적 좋다</label>
-                                </div>
-                            </div>
-                            <div class="question-block">
-                                <strong>자외선 노출이 많은 편인가요?</strong>
-                                <div class="option-row">
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_3" value="A" required>많다</label>
-                                    <label class="option-card"><input type="radio" name="wrinkled_tight_3" value="B">적다</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </div>
+            <section class="submit-panel">
+                <div>
+                    <strong>분석 준비 완료</strong>
+                    <p>사진과 문진 답변을 함께 반영해 개인화 리포트를 생성합니다.</p>
+                </div>
+                <button id="submitButton" type="submit">리포트 생성</button>
+            </section>
         </form>
-    </div>
+    </main>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

@@ -1,137 +1,45 @@
 const photoInput = document.getElementById("photo");
 const fileNameLabel = document.getElementById("selectedFileName");
-const fileStatus = document.getElementById("fileStatus");
-const optionCards = document.querySelectorAll(".option-card");
-const progressCount = document.getElementById("progressCount");
-const progressFill = document.getElementById("progressFill");
+const preview = document.getElementById("imagePreview");
+const previewWrap = preview ? preview.closest(".preview-wrap") : null;
+const form = document.getElementById("analysisForm");
 const submitButton = document.getElementById("submitButton");
-const analysisForm = document.getElementById("analysisForm");
-
-const questionNames = [
-    "dry_oily_1",
-    "dry_oily_2",
-    "dry_oily_3",
-    "sensitive_resistant_1",
-    "sensitive_resistant_2",
-    "sensitive_resistant_3",
-    "pigmented_nonpigmented_1",
-    "pigmented_nonpigmented_2",
-    "pigmented_nonpigmented_3",
-    "wrinkled_tight_1",
-    "wrinkled_tight_2",
-    "wrinkled_tight_3",
-];
-
-const updateOptionState = (name) => {
-    const options = document.querySelectorAll(`input[name="${name}"]`);
-    options.forEach((input) => {
-        const card = input.closest(".option-card");
-        if (!card) {
-            return;
-        }
-        card.classList.toggle("is-selected", input.checked);
-    });
-};
-
-const updateProgress = () => {
-    const answered = questionNames.filter((name) => {
-        const checked = document.querySelector(`input[name="${name}"]:checked`);
-        return Boolean(checked);
-    }).length;
-
-    if (progressCount) {
-        progressCount.textContent = `${answered} / ${questionNames.length}`;
-    }
-
-    if (progressFill) {
-        progressFill.style.width = `${(answered / questionNames.length) * 100}%`;
-    }
-};
 
 if (photoInput && fileNameLabel) {
     photoInput.addEventListener("change", () => {
         const [file] = photoInput.files;
-        const label = file ? file.name : "선택된 파일이 없습니다.";
-        fileNameLabel.textContent = label;
-        if (fileStatus) {
-            fileStatus.textContent = file ? "사진 선택이 완료되었습니다." : "아직 선택되지 않았습니다.";
+        fileNameLabel.textContent = file ? file.name : "JPG, PNG, WEBP 파일을 업로드하세요.";
+
+        if (!file || !preview || !previewWrap) {
+            return;
         }
-    });
-}
 
-optionCards.forEach((card) => {
-    const input = card.querySelector("input[type='radio']");
-    if (!input) {
-        return;
-    }
-
-    card.addEventListener("click", () => {
-        updateOptionState(input.name);
-        updateProgress();
-    });
-
-    input.addEventListener("change", () => {
-        updateOptionState(input.name);
-        updateProgress();
-    });
-});
-
-if (analysisForm && submitButton) {
-    analysisForm.addEventListener("submit", () => {
-        submitButton.classList.add("is-loading");
-        submitButton.textContent = "분석 결과 생성 중...";
-        submitButton.disabled = true;
-    });
-}
-
-questionNames.forEach((name) => updateOptionState(name));
-updateProgress();
-
-const routineSliders = document.querySelectorAll("[data-routine-slider]");
-
-routineSliders.forEach((slider) => {
-    const slides = slider.querySelectorAll("[data-routine-slide]");
-    const prevButton = slider.querySelector("[data-routine-prev]");
-    const nextButton = slider.querySelector("[data-routine-next]");
-    const counter = slider.parentElement?.querySelector("[data-routine-counter]");
-
-    if (slides.length === 0) {
-        return;
-    }
-
-    let activeIndex = 0;
-
-    const renderSlide = () => {
-        slides.forEach((slide, index) => {
-            slide.classList.toggle("is-active", index === activeIndex);
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+            preview.src = reader.result;
+            previewWrap.classList.add("has-image");
         });
-
-        if (counter) {
-            counter.textContent = `${activeIndex + 1} / ${slides.length}`;
-        }
-
-        if (prevButton) {
-            prevButton.disabled = activeIndex === 0;
-        }
-
-        if (nextButton) {
-            nextButton.disabled = activeIndex === slides.length - 1;
-        }
-    };
-
-    prevButton?.addEventListener("click", () => {
-        if (activeIndex > 0) {
-            activeIndex -= 1;
-            renderSlide();
-        }
+        reader.readAsDataURL(file);
     });
+}
 
-    nextButton?.addEventListener("click", () => {
-        if (activeIndex < slides.length - 1) {
-            activeIndex += 1;
-            renderSlide();
-        }
+document.querySelectorAll(".question-block input[type='radio']").forEach((input) => {
+    input.addEventListener("change", () => {
+        document
+            .querySelectorAll(`input[name="${input.name}"]`)
+            .forEach((radio) => {
+                const label = radio.closest("label");
+                if (label) {
+                    label.classList.toggle("is-selected", radio.checked);
+                }
+            });
     });
-
-    renderSlide();
 });
+
+if (form && submitButton) {
+    form.addEventListener("submit", () => {
+        submitButton.classList.add("is-loading");
+        submitButton.disabled = true;
+        submitButton.textContent = "분석 중...";
+    });
+}
