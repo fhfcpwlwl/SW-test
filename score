@@ -1,0 +1,207 @@
+import torch
+import torch.nn as nn
+from torchvision import models, transforms
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from PIL import Image
+import io
+import os
+import numpy as np
+import cv2
+
+# 1. Flask 시스템 초기화 및 CORS 설정
+app = Flask(__name__)
+CORS(app)
+
+# 2. 연산 장치 설정 (CPU/GPU 자동 전환)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"🖥️  시스템 알림: 현재 추론 장치는 [{device}]입니다.")
+
+# 3. AI 모델 아키텍처 및 추론 클래스
+class SkinModel:
+    def __init__(self, model_path, num_classes=2):
+        self.model = models.resnet18(weights=None)
+        num_ftrs = self.model.fc.in_features
+        self.model.fc = nn.Linear(num_ftrs, num_classes)
+        
+        if os.path.exists(model_path):
+            state_dict = torch.load(model_path, map_location=device)
+            self.model.load_state_dict(state_dict)
+            self.model.to(device)
+            self.model.eval()
+            print(f"✅ 가중치 로드 성공: {model_path}")
+        else:
+            raise FileNotFoundError(f"❌ 모델 파일을 찾을 수 없습니다: {model_path}")
+        
+        self.class_names = ['acne', 'healthy']
+
+    def is_human_skin(self, image):
+        """
+        [Domain Guard] HSV 공간을 통한 피부 면적 검증
+        """
+        img_hsv = image.convert('HSV')
+        h, s, v = img_hsv.split()
+        h_arr = np.array(h)
+        s_arr = np.array(s)
+
+        skin_mask = ((h_arr <= 20) | (h_arr >= 160)) & (s_arr >= 40)
+        skin_pixel_ratio = np.sum(skin_mask) / (image.size[0] * image.size[1])
+        return skin_pixel_ratio
+
+    def predict(self, image_bytes):
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+        
+        # 1. 도메인 가드: 피부 노출 비율 검사
+        skin_ratio = self.is_human_skin(image)
+        if skin_ratio < 0.20:
+            return "not_skin", skin_ratio
+
+        # 2. 전처리 파이프라인 가동 (Test-Time Augmentation 적용)
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        
+        img_orig = transform(image).unsqueeze(0).to(device)
+        img_flip = transform(image.transpose(Image.FLIP_LEFT_RIGHT)).unsqueeze(0).to(device)
+        
+        with torch.no_grad():
+            output_orig = self.model(img_orig)
+            output_flip = self.model(img_flip)
+            
+            prob_orig = torch.nn.functional.softmax(output_orig[0], dim=0)
+            prob_flip = torch.nn.functional.softmax(output_flip[0], dim=0)
+            
+            avg_probs = (prob_orig + prob_flip) / 2
+            confidence, preds = torch.max(avg_probs, 0)
+            
+        return self.class_names[preds.item()], confidence.item()
+
+# 4. 컴퓨터 비전 기반 중증도 연산 함수
+def calculate_advanced_skin_score(image_bytes):
+    """
+    고전 컴퓨터 비전 영역 연산 전 이미지 해상도를 표준화(640px)하여 
+    스마트폰 카메라 기종별 화소 수에 따른 노이즈 왜곡을 원천적으로 해결합니다.
+    """
+    file_bytes = np.frombuffer(image_bytes, dtype=np.uint8)
+    img_bgr = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    if img_bgr is None:
+        raise ValueError("이미지 버퍼 디코딩 실패")
+        
+    # [해상도 표준화 단계] 장축 기준 최대 640px 크기로 비율 유지 다운샘플링
+    h, w = img_bgr.shape[:2]
+    max_size = 640
+    if max(h, w) > max_size:
+        scale = max_size / max(h, w)
+        img_bgr = cv2.resize(img_bgr, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+
+    img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
+    total_pixels = img_bgr.shape[0] * img_bgr.shape[1]
+    
+    # 1. 피부색 마스킹
+    lower_skin = np.array([0, 30, 40], dtype=np.uint8)
+    upper_skin = np.array([20, 150, 255], dtype=np.uint8)
+    skin_mask = cv2.inRange(img_hsv, lower_skin, upper_skin)
+    skin_pixel_count = np.sum(skin_mask > 0)
+    
+    if skin_pixel_count < (total_pixels * 0.1):
+        skin_pixel_count = total_pixels
+
+    # 2. 염증 마스킹
+    lower_acne = np.array([0, 80, 50], dtype=np.uint8)
+    upper_acne = np.array([10, 255, 255], dtype=np.uint8)
+    acne_mask = cv2.inRange(img_hsv, lower_acne, upper_acne)
+    acne_in_skin = cv2.bitwise_and(acne_mask, acne_mask, mask=skin_mask)
+
+    # 3. 윤곽선 분석 (표준화된 공간 기준 노이즈 필터 기준 상향)
+    contours, _ = cv2.findContours(acne_in_skin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    valid_contours = [c for c in contours if cv2.contourArea(c) > 15] # 미세 노이즈 배제 임계값 15px로 조정
+    
+    acne_count = len(valid_contours)
+    total_acne_area = sum(cv2.contourArea(c) for c in valid_contours)
+    
+    # 4. 이원화 감점 수식 연산 (완만한 페널티 계수 모델링)
+    penalty_count = min(30, acne_count * 1.5) # 개수당 감점 폭 완화 (최대 30점 감점)
+    severity_ratio = (total_acne_area / skin_pixel_count) * 100
+    penalty_size = min(40, (severity_ratio / 3.0) * 40) # 면적 비율 3% 도달 시 최대 감점 (최대 40점 감점)
+    
+    # 5. 최종 점수 매핑 (기본 점수 85점 기준으로 유연한 수치 분포 유도)
+    skin_score = int(85 - (penalty_count + penalty_size))
+    skin_score = max(10, skin_score) # 최하 안전 방어선 10점 설정
+    
+    return skin_score, acne_count, round(severity_ratio, 2)
+
+# 5. 모델 전역 객체 생성
+MODEL_FILE = "skin_model_best.pth"
+try:
+    predictor = SkinModel(MODEL_FILE)
+except Exception as e:
+    print(f"⚠️ 시스템 경고: 모델 로드 실패 ({e})")
+    predictor = None
+
+# 6. API 엔드포인트 설계 (POST /predict)
+@app.route("/predict", methods=["POST"])
+def predict_skin():
+    if not predictor:
+        return jsonify({"status": "error", "detail": "AI 엔진 미가동"}), 500
+        
+    file = request.files.get('file')
+    if not file:
+        return jsonify({"status": "error", "detail": "이미지 파일 누락"}), 400
+    
+    try:
+        img_bytes = file.read()
+        label, confidence = predictor.predict(img_bytes)
+        
+        # [Case 1] 도메인 필터 예외 처리
+        if label == "not_skin":
+            return jsonify({
+                "status": "not_skin",
+                "prediction": "unknown",
+                "confidence": round(confidence * 100, 2),
+                "skin_score": 0,
+                "acne_count": 0,
+                "severity_ratio": 0.0,
+                "result_msg": "사진에서 피부 영역을 감지할 수 없습니다. 피부 부위를 정면에서 다시 촬영해 주세요."
+            })
+        
+        # [Case 2] 정상 피부 판정 시
+        if label == "healthy":
+            normalized_conf = (confidence - 0.5) / 0.5
+            normalized_conf = max(0.0, min(1.0, normalized_conf))
+            skin_score = int(70 + (normalized_conf * 30)) # 70 ~ 100점 분배
+            
+            return jsonify({
+                "status": "success",
+                "prediction": label,
+                "confidence": round(confidence * 100, 2),
+                "skin_score": skin_score,
+                "acne_count": 0,
+                "severity_ratio": 0.0,
+                "result_msg": f"분석 결과 피부가 양호한 상태입니다. (피부 점수: {skin_score}점)"
+            })
+            
+        # [Case 3] 여드름 판정 시 (하이브리드 CV 가동)
+        elif label == "acne":
+            skin_score, acne_count, severity_ratio = calculate_advanced_skin_score(img_bytes)
+            
+            return jsonify({
+                "status": "success",
+                "prediction": label,
+                "confidence": round(confidence * 100, 2),
+                "skin_score": skin_score,
+                "acne_count": acne_count,
+                "severity_ratio": severity_ratio,
+                "result_msg": f"분석 결과 여드름 반응이 감지되었습니다. 여드름 개수: {acne_count}개, 면적 비율: {severity_ratio}% (피부 점수: {skin_score}점)"
+            })
+            
+    except Exception as e:
+        return jsonify({"status": "error", "detail": str(e)}), 500
+
+@app.route("/", methods=["GET"])
+def health_check():
+    return jsonify({"message": "SkinGuard API is active."})
+
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=8000, debug=True)
