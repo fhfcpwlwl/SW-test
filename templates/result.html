@@ -3,20 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skin Lab | Analysis Result</title>
+    <title>Skin Care AI | Analysis Result</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="top-strip">Skin Report</div>
+    {% set raw_prediction = result.analysis.pytorch_predicted_class|string %}
+    {% set prediction_key = raw_prediction|lower %}
+    {% if "disease" in prediction_key or "acne" in prediction_key or "여드름" in raw_prediction or "트러블" in raw_prediction %}
+        {% set display_prediction = "피부 트러블 의심" %}
+        {% set prediction_route = "트러블 케어 경로" %}
+        {% set prediction_note = "사진에서 여드름성 트러블 또는 피부 고민 패턴이 더 강하게 감지되었습니다." %}
+    {% elif "healthy" in prediction_key or "normal" in prediction_key or "정상" in raw_prediction or "건강" in raw_prediction %}
+        {% set display_prediction = "정상 피부 경향" %}
+        {% set prediction_route = "정상 피부 경로" %}
+        {% set prediction_note = "사진에서 정상 피부에 가까운 패턴이 더 강하게 감지되었습니다." %}
+    {% else %}
+        {% set display_prediction = raw_prediction %}
+        {% set prediction_route = "AI 분류 경로" %}
+        {% set prediction_note = "사진 기반 AI 모델이 가장 가까운 피부 패턴을 선택했습니다." %}
+    {% endif %}
+
+    <div class="top-strip">Skin Care AI Report</div>
 
     <header class="site-header">
-        <a href="/" class="brand-mark" aria-label="Skin Lab home">
-            <span class="brand-symbol">SL</span>
+        <a href="/" class="brand-mark" aria-label="Skin Care AI home">
+            <span class="brand-symbol">SC</span>
             <span>
-                <strong>Skin Lab</strong>
+                <strong>Skin Care AI</strong>
                 <small>AI Skin Analysis</small>
             </span>
         </a>
@@ -24,54 +40,70 @@
     </header>
 
     <main class="page-shell">
-        <section class="result-hero">
+        <section class="result-hero compact-report">
             <div class="result-title">
-                <span class="eyebrow">Result</span>
-                <h1>{{ result.skin_mbti.code }}</h1>
+                <span class="eyebrow">Analysis summary</span>
+                <h1>{{ display_prediction }}</h1>
+                <p>{{ prediction_note }} 이 결과는 의료 진단이 아니라 스킨케어 참고용 분석입니다.</p>
             </div>
             <div class="result-score">
                 <span>Score</span>
                 <strong>{{ result.report.overall_score }}</strong>
-                <small>{{ result.report.overall_level }}</small>
+                <small>{{ result.analysis.pytorch_confidence }}% confidence</small>
             </div>
         </section>
 
-        <section class="snapshot-grid">
-            <article class="snapshot-card">
-                <span class="card-label">AI 판정</span>
-                <strong>{{ result.analysis.pytorch_predicted_class }}</strong>
-                <p>{{ result.analysis.pytorch_confidence }}%</p>
-            </article>
-            <article class="snapshot-card">
-                <span class="card-label">피부 타입</span>
-                <strong>{{ result.skin_mbti.code }}</strong>
-                <p>맞춤 루틴</p>
-            </article>
-            <article class="snapshot-card photo-card">
-                <span class="card-label">업로드 사진</span>
-                {% if result.uploaded_preview %}
-                <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 분석 사진">
-                {% else %}
-                <p>사진 미리보기를 불러오지 못했습니다.</p>
-                {% endif %}
-            </article>
-        </section>
-
-        <section class="content-card">
+        <section class="content-card analysis-explainer">
             <div class="section-head">
-                <span class="step-label">Priority</span>
+                <span class="step-label">AI Logic</span>
                 <div>
-                    <h2>우선 관리</h2>
+                    <h2>AI가 결과를 정리하는 방식</h2>
+                    <p>사진을 먼저 분류한 뒤, 트러블 경향이 감지되면 점수와 관리 우선순위를 더 보수적으로 계산합니다.</p>
                 </div>
             </div>
-            <div class="metric-grid">
-                {% for concern in result.report.top_concerns %}
-                <article class="metric-card compact">
-                    <strong>Point {{ loop.index }}</strong>
-                    <span>{{ concern.score }}</span>
-                    <small>Priority</small>
+
+            <div class="pipeline-flow">
+                <article class="pipeline-card">
+                    <span>01</span>
+                    <strong>이미지 품질 확인</strong>
+                    <p>얼굴 사진, 밝기, 피부 영역이 분석 가능한지 먼저 확인합니다.</p>
                 </article>
-                {% endfor %}
+                <div class="flow-arrow" aria-hidden="true">→</div>
+                <article class="pipeline-card active">
+                    <span>02</span>
+                    <strong>AI 피부 분류</strong>
+                    <p>모델이 정상 피부와 트러블 패턴 중 더 가까운 경로를 선택합니다.</p>
+                </article>
+                <div class="flow-arrow" aria-hidden="true">→</div>
+                <article class="pipeline-card emphasis">
+                    <span>03</span>
+                    <strong>{{ prediction_route }}</strong>
+                    <p>{{ display_prediction }} 결과를 기준으로 점수와 루틴을 구성합니다.</p>
+                </article>
+            </div>
+
+            <div class="penalty-panel">
+                <div>
+                    <h3>점수 해석</h3>
+                    <p>높은 점수는 현재 사진이 안정적인 피부 패턴에 가깝다는 뜻이고, 낮은 점수는 진정/트러블 케어 우선순위가 높다는 뜻입니다.</p>
+                </div>
+                <div class="score-bars" aria-label="점수 구간 설명">
+                    <div class="score-bar-row">
+                        <span>안정</span>
+                        <div class="score-bar"><i style="width: 86%"></i></div>
+                        <strong>85-100</strong>
+                    </div>
+                    <div class="score-bar-row">
+                        <span>관찰</span>
+                        <div class="score-bar caution"><i style="width: 62%"></i></div>
+                        <strong>60-84</strong>
+                    </div>
+                    <div class="score-bar-row">
+                        <span>집중 케어</span>
+                        <div class="score-bar alert"><i style="width: 38%"></i></div>
+                        <strong>0-59</strong>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -79,19 +111,45 @@
             <div class="section-head">
                 <span class="step-label">Details</span>
                 <div>
-                    <h2>상세</h2>
+                    <h2>상세 정보</h2>
                 </div>
             </div>
+            <div class="snapshot-grid report-snapshot-row">
+                <article class="snapshot-card">
+                    <span class="card-label">AI 판정</span>
+                    <strong>{{ display_prediction }}</strong>
+                    <p>원본 라벨: {{ raw_prediction }}</p>
+                </article>
+                <article class="snapshot-card">
+                    <span class="card-label">우선 관리</span>
+                    {% if result.report.top_concerns %}
+                    <strong>{{ result.report.top_concerns[0].label }}</strong>
+                    <p>{{ result.report.top_concerns[0].score }}</p>
+                    {% else %}
+                    <strong>기본 관리</strong>
+                    <p>routine</p>
+                    {% endif %}
+                </article>
+                <article class="snapshot-card photo-card">
+                    <span class="card-label">업로드 사진</span>
+                    {% if result.uploaded_preview %}
+                    <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 분석 사진">
+                    {% else %}
+                    <p>사진 미리보기를 불러오지 못했습니다.</p>
+                    {% endif %}
+                </article>
+            </div>
+
             {% set detail_labels = ["AI 분류", "신뢰도", "피부 밸런스", "진정 관리", "보습 관리", "자외선 관리"] %}
             <div class="metric-grid detail-grid">
                 {% for card in result.report.condition_cards %}
                 <article class="metric-card">
                     <div class="metric-top">
                         <strong>{{ detail_labels[loop.index0] if loop.index0 < detail_labels|length else "피부 지표" }}</strong>
-                        <span>Score</span>
+                        <span>{{ card.level }}</span>
                     </div>
                     <div class="metric-value">{{ card.score }}</div>
-                    <small>Daily care</small>
+                    <small>{{ card.label }}</small>
                 </article>
                 {% endfor %}
             </div>
@@ -102,25 +160,26 @@
                 <div class="section-head">
                     <span class="step-label">AM</span>
                     <div>
-                        <h2>AM</h2>
+                        <h2>오전 루틴</h2>
                     </div>
                 </div>
                 <ol class="routine-list">
                     <li>저자극 클렌저로 가볍게 세안합니다.</li>
                     <li>토너로 피부결을 정돈하고 진정감을 더합니다.</li>
                     <li>수분 앰플 또는 크림으로 보습막을 만듭니다.</li>
-                    <li>외출 전 선스크린으로 자외선 차단을 마무리합니다.</li>
+                    <li>외출 전 선스크린으로 마무리합니다.</li>
                 </ol>
             </article>
+
             <article class="content-card">
                 <div class="section-head">
                     <span class="step-label">PM</span>
                     <div>
-                        <h2>PM</h2>
+                        <h2>오후 루틴</h2>
                     </div>
                 </div>
                 <ol class="routine-list">
-                    <li>클렌저로 메이크업과 노폐물을 꼼꼼히 지웁니다.</li>
+                    <li>클렌저로 노폐물과 메이크업을 지웁니다.</li>
                     <li>진정 토너로 붉은기와 민감 반응을 달래줍니다.</li>
                     <li>고민 부위에는 집중 케어 제품을 얇게 바릅니다.</li>
                     <li>보습 크림으로 밤사이 수분 손실을 줄입니다.</li>
@@ -130,9 +189,9 @@
 
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Shop guide</span>
+                <span class="step-label">Products</span>
                 <div>
-                    <h2>추천</h2>
+                    <h2>제품 추천</h2>
                 </div>
             </div>
             <div class="product-grid">
@@ -151,23 +210,22 @@
             </div>
         </section>
 
-        {% if result.advice %}
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Advice</span>
+                <span class="step-label">Memo</span>
                 <div>
                     <h2>메모</h2>
                 </div>
             </div>
             <div class="advice-list">
+                <p>AI 판정은 사진의 조명, 각도, 화질에 영향을 받을 수 있어 참고용으로 확인하세요.</p>
                 <p>새 제품은 한 번에 많이 바꾸기보다 하나씩 추가해 피부 반응을 확인하세요.</p>
-                <p>아침에는 자외선 차단, 저녁에는 세안과 보습을 우선순위로 두면 루틴이 안정됩니다.</p>
+                <p>증상이 심하거나 오래 지속되면 피부과 전문 의료진과 상담하는 것이 좋습니다.</p>
             </div>
         </section>
-        {% endif %}
 
         <footer class="report-footer">
-            <p>참고용 결과입니다.</p>
+            <p>본 결과는 스킨케어 참고용이며 질환 진단이나 치료 판단을 대신하지 않습니다.</p>
             <a href="/" class="primary-link">다시</a>
         </footer>
     </main>
