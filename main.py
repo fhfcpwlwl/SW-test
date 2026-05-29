@@ -10,10 +10,10 @@ from config import FASTAPI_HOST, FASTAPI_PORT, PYTORCH_MODEL_ENABLED, PYTORCH_MO
 from logger import setup_logger
 from skin_analyzer import (
     build_pytorch_advice,
-    build_pytorch_personalized_report,
     ensure_face_image,
     parse_skin_mbti,
 )
+from pytorch_report import build_pytorch_personalized_report
 from torch_skin_model import load_pytorch_model, predict_pytorch_skin_model
 from utils import clean_analysis_result, create_safe_filename, validate_file_upload
 

@@ -11,15 +11,19 @@
 </head>
 <body>
     {% set raw_prediction = result.analysis.pytorch_predicted_class|string %}
-    {% set prediction_key = raw_prediction|lower %}
-    {% if "disease" in prediction_key or "acne" in prediction_key or "여드름" in raw_prediction or "트러블" in raw_prediction %}
+    {% set prediction_route_key = result.analysis.prediction_route|default("") %}
+    {% if prediction_route_key == "acne" %}
         {% set display_prediction = "피부 트러블 의심" %}
         {% set prediction_route = "트러블 케어 경로" %}
         {% set prediction_note = "사진에서 여드름성 트러블 또는 피부 고민 패턴이 더 강하게 감지되었습니다." %}
-    {% elif "healthy" in prediction_key or "normal" in prediction_key or "정상" in raw_prediction or "건강" in raw_prediction %}
+    {% elif prediction_route_key == "healthy" %}
         {% set display_prediction = "정상 피부 경향" %}
         {% set prediction_route = "정상 피부 경로" %}
         {% set prediction_note = "사진에서 정상 피부에 가까운 패턴이 더 강하게 감지되었습니다." %}
+    {% elif prediction_route_key == "not_skin" %}
+        {% set display_prediction = "분석 보류" %}
+        {% set prediction_route = "이미지 재확인 경로" %}
+        {% set prediction_note = "피부 영역이 충분히 감지되지 않아 정면 얼굴 사진으로 다시 촬영하는 것이 좋습니다." %}
     {% else %}
         {% set display_prediction = raw_prediction %}
         {% set prediction_route = "AI 분류 경로" %}
@@ -29,13 +33,6 @@
     <div class="top-strip">Skin Care AI Report</div>
 
     <header class="site-header">
-        <a href="/" class="brand-mark" aria-label="Skin Care AI home">
-            <span class="brand-symbol">SC</span>
-            <span>
-                <strong>Skin Care AI</strong>
-                <small>AI Skin Analysis</small>
-            </span>
-        </a>
         <a href="/" class="header-button">다시 분석</a>
     </header>
 
@@ -47,9 +44,9 @@
                 <p>{{ prediction_note }} 이 결과는 의료 진단이 아니라 스킨케어 참고용 분석입니다.</p>
             </div>
             <div class="result-score">
-                <span>Score</span>
+                <span>Skin Score</span>
                 <strong>{{ result.report.overall_score }}</strong>
-                <small>{{ result.analysis.pytorch_confidence }}% confidence</small>
+                <small>{{ result.analysis.pytorch_confidence }}% AI 판정 신뢰도</small>
             </div>
         </section>
 
@@ -107,6 +104,111 @@
             </div>
         </section>
 
+        <section class="routine-grid">
+            <article class="content-card">
+                <div class="section-head">
+                    <span class="step-label">AM</span>
+                    <div>
+                        <h2>오전 루틴</h2>
+                    </div>
+                </div>
+                <ol class="routine-list">
+                    {% for step in result.report.routine.morning %}
+                    <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+            </article>
+
+            <article class="content-card">
+                <div class="section-head">
+                    <span class="step-label">PM</span>
+                    <div>
+                        <h2>오후 루틴</h2>
+                    </div>
+                </div>
+                <ol class="routine-list">
+                    {% for step in result.report.routine.evening %}
+                    <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+            </article>
+        </section>
+
+        <section class="content-card">
+            <div class="section-head">
+                <span class="step-label">Products</span>
+                <div>
+                    <h2>제품 추천</h2>
+                </div>
+            </div>
+            <div class="product-grid">
+                {% for item in result.report.product_recommendations %}
+                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
+                    <div class="product-image-wrap">
+                        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                    </div>
+                    <div class="product-copy">
+                        <span>Recommended {{ loop.index }}</span>
+                        <strong>{{ item.name }}</strong>
+                        <small>{{ item.brand }} · {{ item.price }}</small>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="content-card">
+            <div class="section-head">
+                <span class="step-label">Survey</span>
+                <div>
+                    <h2>피부 MBTI 설문 결과</h2>
+                    <p>사진 분석과 함께 반영된 설문 기반 피부 성향입니다.</p>
+                </div>
+            </div>
+            <div class="metric-grid mbti-grid">
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <strong>피부 타입 코드</strong>
+                        <span>MBTI</span>
+                    </div>
+                    <div class="metric-value">{{ result.skin_mbti.code }}</div>
+                    <small>설문 응답 기반</small>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <strong>유수분 경향</strong>
+                        <span>{{ result.skin_mbti.dry_oily.code }}</span>
+                    </div>
+                    <div class="metric-value">{{ result.skin_mbti.dry_oily.label }}</div>
+                    <small>건성/지성 경향</small>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <strong>민감도</strong>
+                        <span>{{ result.skin_mbti.sensitive_resistant.code }}</span>
+                    </div>
+                    <div class="metric-value">{{ result.skin_mbti.sensitive_resistant.label }}</div>
+                    <small>민감성/저항성 경향</small>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <strong>색소 경향</strong>
+                        <span>{{ result.skin_mbti.pigmented_nonpigmented.code }}</span>
+                    </div>
+                    <div class="metric-value">{{ result.skin_mbti.pigmented_nonpigmented.label }}</div>
+                    <small>색소 흔적 경향</small>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-top">
+                        <strong>탄력/주름 경향</strong>
+                        <span>{{ result.skin_mbti.wrinkled_tight.code }}</span>
+                    </div>
+                    <div class="metric-value">{{ result.skin_mbti.wrinkled_tight.label }}</div>
+                    <small>주름/탄력 관리 경향</small>
+                </article>
+            </div>
+        </section>
+
         <section class="content-card">
             <div class="section-head">
                 <span class="step-label">Details</span>
@@ -140,72 +242,16 @@
                 </article>
             </div>
 
-            {% set detail_labels = ["AI 분류", "신뢰도", "피부 밸런스", "진정 관리", "보습 관리", "자외선 관리"] %}
             <div class="metric-grid detail-grid">
                 {% for card in result.report.condition_cards %}
                 <article class="metric-card">
                     <div class="metric-top">
-                        <strong>{{ detail_labels[loop.index0] if loop.index0 < detail_labels|length else "피부 지표" }}</strong>
+                        <strong>{{ card.label }}</strong>
                         <span>{{ card.level }}</span>
                     </div>
                     <div class="metric-value">{{ card.score }}</div>
-                    <small>{{ card.label }}</small>
+                    <small>{{ card.focus_area }}</small>
                 </article>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section class="routine-grid">
-            <article class="content-card">
-                <div class="section-head">
-                    <span class="step-label">AM</span>
-                    <div>
-                        <h2>오전 루틴</h2>
-                    </div>
-                </div>
-                <ol class="routine-list">
-                    <li>저자극 클렌저로 가볍게 세안합니다.</li>
-                    <li>토너로 피부결을 정돈하고 진정감을 더합니다.</li>
-                    <li>수분 앰플 또는 크림으로 보습막을 만듭니다.</li>
-                    <li>외출 전 선스크린으로 마무리합니다.</li>
-                </ol>
-            </article>
-
-            <article class="content-card">
-                <div class="section-head">
-                    <span class="step-label">PM</span>
-                    <div>
-                        <h2>오후 루틴</h2>
-                    </div>
-                </div>
-                <ol class="routine-list">
-                    <li>클렌저로 노폐물과 메이크업을 지웁니다.</li>
-                    <li>진정 토너로 붉은기와 민감 반응을 달래줍니다.</li>
-                    <li>고민 부위에는 집중 케어 제품을 얇게 바릅니다.</li>
-                    <li>보습 크림으로 밤사이 수분 손실을 줄입니다.</li>
-                </ol>
-            </article>
-        </section>
-
-        <section class="content-card">
-            <div class="section-head">
-                <span class="step-label">Products</span>
-                <div>
-                    <h2>제품 추천</h2>
-                </div>
-            </div>
-            <div class="product-grid">
-                {% for item in result.report.product_recommendations %}
-                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
-                    <div class="product-image-wrap">
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}">
-                    </div>
-                    <div class="product-copy">
-                        <span>Recommended {{ loop.index }}</span>
-                        <strong>{{ item.name }}</strong>
-                        <small>{{ item.brand }} · {{ item.price }}</small>
-                    </div>
-                </a>
                 {% endfor %}
             </div>
         </section>

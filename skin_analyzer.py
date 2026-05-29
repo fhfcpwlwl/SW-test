@@ -479,15 +479,28 @@ def _copy_products_by_keys(product_keys: List[str]) -> List[Dict[str, str]]:
     return selected
 
 
-def build_pytorch_product_recommendations(skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
-    """Build product recommendations from the questionnaire while keeping image analysis AI-only."""
+def build_pytorch_product_recommendations(
+    skin_mbti: Dict[str, Any], analysis: Dict[str, Any] | None = None
+) -> List[Dict[str, str]]:
+    """Build product recommendations from the questionnaire and AI skin analysis."""
     code = skin_mbti.get("code", "????")
+    analysis = analysis or {}
+    prediction_route = analysis.get("prediction_route", "unknown")
+    skin_score = float(analysis.get("skin_score", analysis.get("pytorch_confidence", 0)) or 0)
+    acne_count = int(analysis.get("acne_count", 0) or 0)
+    severity_ratio = float(analysis.get("severity_ratio", 0) or 0)
     keys = ["cleanser", "soothing_toner"]
 
     if code.startswith("D"):
         keys.extend(["moisture_ampoule", "soothing_cream"])
     else:
         keys.extend(["blemish_cream", "moisture_ampoule"])
+
+    if prediction_route == "acne" or acne_count > 0 or severity_ratio >= 0.2:
+        keys.append("blemish_cream")
+
+    if skin_score and skin_score < 65:
+        keys.extend(["moisture_ampoule", "soothing_cream"])
 
     if "W" in code or "P" in code:
         keys.append("retinol")
@@ -518,9 +531,19 @@ def build_pytorch_condition_cards(analysis: Dict[str, Any]) -> List[Dict[str, An
     return cards
 
 
-def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]]:
-    """Build a simple routine around the selected official products."""
+def build_pytorch_routine(
+    products: List[Dict[str, str]], analysis: Dict[str, Any] | None = None
+) -> Dict[str, List[str]]:
+    """Build a routine around selected products and AI analysis signals."""
     product_map = {product["key"]: product for product in products}
+    analysis = analysis or {}
+    prediction_route = analysis.get("prediction_route", "unknown")
+    predicted_class = analysis.get("pytorch_predicted_class", "unknown")
+    confidence = float(analysis.get("pytorch_confidence", 0) or 0)
+    skin_score = float(analysis.get("skin_score", confidence) or 0)
+    acne_count = int(analysis.get("acne_count", 0) or 0)
+    severity_ratio = float(analysis.get("severity_ratio", 0) or 0)
+    acne_signal = prediction_route == "acne" or acne_count > 0 or severity_ratio >= 0.2
 
     morning = [
         f"{product_map['cleanser']['name']}로 세안을 시작합니다.",
@@ -535,6 +558,9 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         morning.append(f"{product_map['moisture_ampoule']['name']}로 수분을 채워줍니다.")
         evening.append(f"{product_map['moisture_ampoule']['name']}를 충분히 레이어링합니다.")
 
+    if acne_signal and "blemish_cream" in product_map:
+        morning.append(f"AI가 {predicted_class} 경향을 감지해 트러블 부위에는 {product_map['blemish_cream']['name']}를 소량만 사용합니다.")
+
     if "blemish_cream" in product_map:
         evening.append(f"트러블 부위에는 {product_map['blemish_cream']['name']}를 가볍게 사용합니다.")
 
@@ -544,6 +570,16 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
     if "soothing_cream" in product_map:
         morning.append(f"건조함이 느껴지면 {product_map['soothing_cream']['name']}로 마무리합니다.")
         evening.append(f"{product_map['soothing_cream']['name']}로 보습막을 마무리합니다.")
+
+    if confidence < 60:
+        morning.append("AI 신뢰도가 낮은 편이므로 오늘은 자극적인 기능성 제품보다 진정과 보습 위주로 단순하게 유지합니다.")
+        evening.append("분석 신뢰도가 낮아 밤에는 새 제품을 늘리기보다 기존 진정 루틴을 유지합니다.")
+    elif skin_score and skin_score < 60:
+        morning.append("AI 피부 점수가 낮게 나와 낮 동안 보습막을 얇게 유지하고 손으로 만지는 자극을 줄입니다.")
+        evening.append("AI 피부 점수가 낮게 나와 밤에는 트러블 부위 케어 후 보습 단계를 충분히 가져갑니다.")
+    elif prediction_route == "healthy" and skin_score >= 85:
+        morning.append("AI가 안정적인 피부 상태로 판단했으므로 아침 루틴은 가볍게 유지합니다.")
+        evening.append("안정적인 상태를 유지할 수 있게 밤에는 세안과 보습을 과하게 늘리지 않습니다.")
 
     morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
 
@@ -593,7 +629,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
     routine_steps.append(
         {
             "period": "아침",
-            "title": "5. 선케어",
+            "title": "5. 자외선 차단",
             "description": "외출 전 피부를 보호합니다.",
             "product_name": product_map["sunscreen"]["name"],
             "product_url": product_map["sunscreen"]["url"],
@@ -677,7 +713,7 @@ def build_pytorch_routine(products: List[Dict[str, str]]) -> Dict[str, List[str]
         title_body = step["title"].split(". ", 1)[1] if ". " in step["title"] else step["title"]
         step["title"] = f"{period_counters[period]}. {title_body}"
 
-    return {"morning": morning[:5], "evening": evening[:5], "steps": routine_steps}
+    return {"morning": morning[:6], "evening": evening[:6], "steps": routine_steps}
 
 
 def build_pytorch_advice(analysis: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[str]:
@@ -711,7 +747,7 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
     confidence = clamp_score(float(analysis.get("pytorch_confidence", 0)))
     cards = build_pytorch_condition_cards(analysis)
     top_concerns = cards[:3]
-    products = build_pytorch_product_recommendations(skin_mbti)
+    products = build_pytorch_product_recommendations(skin_mbti, analysis)
 
     if confidence >= 80:
         overall_level = "판독 신뢰 높음"
@@ -732,6 +768,6 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
         "top_concerns": top_concerns,
         "condition_cards": cards,
         "product_recommendations": products,
-        "routine": build_pytorch_routine(products),
+        "routine": build_pytorch_routine(products, analysis),
         "disclaimer": "이 결과는 사진 분석과 설문 응답을 바탕으로 한 참고용 안내입니다.",
     }

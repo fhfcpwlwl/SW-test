@@ -23,16 +23,30 @@ if (photoInput && fileNameLabel) {
     });
 }
 
-document.querySelectorAll(".question-block input[type='radio']").forEach((input) => {
-    input.addEventListener("change", () => {
-        document
-            .querySelectorAll(`input[name="${input.name}"]`)
-            .forEach((radio) => {
-                const label = radio.closest("label");
-                if (label) {
-                    label.classList.toggle("is-selected", radio.checked);
-                }
-            });
+const surveyQuestions = Array.from(document.querySelectorAll(".scale-question"));
+const submitPanel = document.querySelector(".submit-panel");
+
+function scrollToNextSurveyStep(currentQuestion) {
+    const currentIndex = surveyQuestions.indexOf(currentQuestion);
+    const nextTarget = surveyQuestions[currentIndex + 1] || submitPanel;
+
+    if (!nextTarget) {
+        return;
+    }
+
+    window.setTimeout(() => {
+        nextTarget.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+        });
+    }, 140);
+}
+
+surveyQuestions.forEach((question) => {
+    question.addEventListener("change", (event) => {
+        if (event.target.matches('input[type="radio"]')) {
+            scrollToNextSurveyStep(question);
+        }
     });
 });
 

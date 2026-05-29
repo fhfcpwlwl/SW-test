@@ -458,6 +458,154 @@ li {
     min-width: 0;
 }
 
+.personality-survey {
+    padding: 30px;
+}
+
+.survey-intro {
+    max-width: 820px;
+    margin: 0 auto 22px;
+    padding-right: 0;
+    text-align: center;
+    justify-items: center;
+}
+
+.scale-question-list {
+    display: grid;
+    gap: 16px;
+}
+
+.scale-question {
+    display: grid;
+    gap: 20px;
+    padding: 26px 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fbfcfa;
+}
+
+.scale-question:first-child {
+    border-top: 1px solid var(--line);
+}
+
+.scale-statement {
+    color: var(--text);
+    max-width: 780px;
+    margin: 0 auto;
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.78;
+    text-align: center;
+}
+
+.scale-helper {
+    max-width: 720px;
+    margin: -10px auto 0;
+    color: #8a948b;
+    font-size: 0.86rem;
+    font-weight: 500;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.scale-row {
+    display: grid;
+    grid-template-columns: minmax(104px, 0.25fr) minmax(360px, 1fr) minmax(104px, 0.25fr);
+    gap: 20px;
+    align-items: center;
+}
+
+.scale-side {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 900;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.scale-side.agree {
+    color: var(--accent);
+}
+
+.scale-side.disagree {
+    color: var(--warning);
+}
+
+.scale-options {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(38px, 1fr));
+    gap: 14px;
+    align-items: center;
+    justify-items: center;
+}
+
+.scale-choice {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.scale-choice input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scale-choice span {
+    display: block;
+    border: 3px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.scale-choice.size-lg span {
+    width: 46px;
+    height: 46px;
+}
+
+.scale-choice.size-md span {
+    width: 38px;
+    height: 38px;
+}
+
+.scale-choice.size-sm span {
+    width: 30px;
+    height: 30px;
+}
+
+.scale-choice.neutral span {
+    width: 26px;
+    height: 26px;
+    border-color: #9aa49b;
+}
+
+.scale-choice.side-a span {
+    border-color: var(--accent);
+}
+
+.scale-choice.side-b span {
+    border-color: var(--warning);
+}
+
+.scale-choice:has(input:checked) span {
+    transform: scale(1.08);
+}
+
+.scale-choice.side-a:has(input:checked) span {
+    background: var(--accent);
+}
+
+.scale-choice.side-b:has(input:checked) span {
+    background: var(--warning);
+}
+
+.scale-choice.neutral:has(input:checked) span {
+    background: #9aa49b;
+}
+
 .submit-panel {
     display: flex;
     justify-content: space-between;
@@ -758,6 +906,53 @@ ol {
         grid-template-columns: 1fr;
     }
 
+    .personality-survey {
+        padding: 20px;
+    }
+
+    .scale-question {
+        padding: 22px 12px;
+    }
+
+    .scale-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .scale-options {
+        grid-template-columns: repeat(7, minmax(30px, 1fr));
+        gap: 6px;
+        order: 2;
+    }
+
+    .scale-side.agree {
+        order: 1;
+    }
+
+    .scale-side.disagree {
+        order: 3;
+    }
+
+    .scale-choice {
+        width: 38px;
+        height: 46px;
+    }
+
+    .scale-choice.size-lg span {
+        width: 36px;
+        height: 36px;
+    }
+
+    .scale-choice.size-md span {
+        width: 30px;
+        height: 30px;
+    }
+
+    .scale-choice.size-sm span {
+        width: 24px;
+        height: 24px;
+    }
+
     button,
     .primary-link {
         width: 100%;
@@ -785,7 +980,7 @@ ol {
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-end;
     gap: 18px;
     border-bottom: 1px solid rgba(197, 210, 186, 0.65);
 }
@@ -1122,6 +1317,10 @@ ol {
     grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.mbti-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .metric-card,
 .product-card {
     display: grid;
@@ -1253,7 +1452,8 @@ ol {
     }
 
     .metric-grid,
-    .detail-grid {
+    .detail-grid,
+    .mbti-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1286,7 +1486,8 @@ ol {
     }
 
     .metric-grid,
-    .detail-grid {
+    .detail-grid,
+    .mbti-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1297,5 +1498,322 @@ ol {
 
     .score-bar-row strong {
         text-align: left;
+    }
+}
+
+/* Channel Pro inspired clinical product-page theme */
+:root {
+    --bg: #f7f8f4;
+    --surface: #ffffff;
+    --surface-soft: #f2f4ed;
+    --line: #d8ddd1;
+    --text: #111512;
+    --muted: #62695f;
+    --accent: #78bd36;
+    --accent-strong: #1d2718;
+    --accent-soft: #edf6df;
+    --warning: #996044;
+    --ink-soft: #2d332b;
+    --shadow: 0 14px 34px rgba(17, 21, 18, 0.06);
+    --radius: 8px;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.app-shell,
+.page-shell,
+.site-header {
+    width: min(1240px, calc(100% - 44px));
+}
+
+.topbar,
+.site-header {
+    border-bottom: 1px solid var(--line);
+}
+
+.brand {
+    color: var(--text);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.brand-mark {
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: inset 0 0 0 6px #111512;
+}
+
+.status-pill,
+.ghost-link,
+.header-button {
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.top-strip {
+    min-height: 34px;
+    background: #111512;
+    color: #eff8e6;
+    letter-spacing: 0.16em;
+}
+
+.hero-band {
+    min-height: 520px;
+    padding: 62px 0 38px;
+    border-bottom: 1px solid var(--line);
+}
+
+.hero-copy {
+    align-content: center;
+}
+
+.eyebrow,
+.step-label,
+.card-label {
+    color: #4c851d;
+    letter-spacing: 0.16em;
+}
+
+h1 {
+    color: #111512;
+    font-size: clamp(3.1rem, 7vw, 7.2rem);
+    line-height: 0.96;
+}
+
+h2 {
+    color: #111512;
+    font-size: 1.36rem;
+}
+
+.hero-text,
+.section-heading p,
+.section-head p,
+.submit-panel p,
+.metric-card p,
+.report-footer p,
+.advice-list p,
+li {
+    color: var(--muted);
+}
+
+.hero-visual {
+    border-radius: var(--radius);
+    background:
+        linear-gradient(145deg, rgba(17, 21, 18, 0.94), rgba(31, 39, 27, 0.9)),
+        radial-gradient(circle at 72% 22%, rgba(120, 189, 54, 0.55), transparent 28%);
+    box-shadow: none;
+}
+
+.face-card {
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(120, 189, 54, 0.3);
+}
+
+.face-preview {
+    border-radius: var(--radius);
+    background:
+        radial-gradient(circle at 50% 32%, #f1cdb9 0 16%, transparent 17%),
+        radial-gradient(circle at 50% 50%, #d99f85 0 25%, transparent 26%),
+        linear-gradient(160deg, #111512, #eef7e3);
+}
+
+.scan-line {
+    background: var(--accent);
+}
+
+.upload-panel,
+.survey-panel,
+.submit-panel,
+.summary-panel,
+.metrics-section,
+.score-panel,
+.result-title,
+.result-score,
+.content-card,
+.snapshot-card,
+.metric-card,
+.product-card,
+.pipeline-card,
+.penalty-panel {
+    border-radius: var(--radius);
+    box-shadow: none;
+}
+
+.upload-panel,
+.survey-panel,
+.submit-panel,
+.content-card,
+.result-title,
+.snapshot-card {
+    border-color: var(--line);
+}
+
+.dropzone {
+    border-color: #9bae87;
+    background:
+        linear-gradient(180deg, rgba(237, 246, 223, 0.82), rgba(255, 255, 255, 0.95));
+}
+
+.upload-icon,
+.routine-list li::before {
+    border-radius: 50%;
+    background: var(--accent);
+    color: #111512;
+}
+
+.preview-wrap,
+.product-image-wrap,
+.photo-card img,
+.advice-list p,
+.routine-list li,
+.score-bar,
+.pipeline-card,
+.metric-card,
+.product-card {
+    border-radius: var(--radius);
+}
+
+.scale-question {
+    border-radius: var(--radius);
+    background: #fff;
+}
+
+.scale-choice.side-a span,
+.scale-choice.side-b span,
+.scale-choice.neutral span {
+    border-color: #9aaa91;
+}
+
+.scale-choice.side-a:has(input:checked) span,
+.scale-choice.side-b:has(input:checked) span,
+.scale-choice.neutral:has(input:checked) span {
+    background: #111512;
+    border-color: var(--accent);
+}
+
+button,
+.primary-link {
+    border: 1px solid #111512;
+    background: #111512;
+    color: #fff;
+    border-radius: var(--radius);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+button:hover,
+.primary-link:hover {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #111512;
+}
+
+.result-hero {
+    gap: 16px;
+}
+
+.result-title {
+    min-height: 340px;
+    border-color: var(--line);
+}
+
+.result-title h1 {
+    font-size: clamp(3rem, 6vw, 6.6rem);
+    line-height: 0.98;
+}
+
+.result-score {
+    background: #111512;
+    color: #eff8e6;
+}
+
+.result-score strong {
+    color: var(--accent);
+}
+
+.pipeline-card.active,
+.pipeline-card.emphasis {
+    border-color: #111512;
+    background: #fff;
+}
+
+.pipeline-card span,
+.metric-card.compact span,
+.metric-value,
+.metric-top span,
+.metric-card small,
+.product-copy span,
+.product-copy small {
+    color: #4c851d;
+}
+
+.score-bar i,
+.score-bar.caution i,
+.score-bar.alert i {
+    background: var(--accent);
+}
+
+.product-card:hover {
+    border-color: #111512;
+    transform: translateY(-2px);
+}
+
+.routine-list li {
+    background: #f7f8f4;
+    border: 1px solid var(--line);
+}
+
+.report-footer {
+    border-radius: var(--radius);
+    box-shadow: none;
+}
+
+@media (max-width: 760px) {
+    .app-shell,
+    .page-shell,
+    .site-header {
+        width: min(100% - 24px, 1240px);
+    }
+
+    .hero-band {
+        min-height: auto;
+        padding: 34px 0 24px;
+    }
+
+    h1,
+    .result-title h1 {
+        font-size: 2.7rem;
+        line-height: 1.02;
+    }
+}
+
+@media (max-width: 1040px) {
+    .result-hero.compact-report {
+        grid-template-columns: 1fr;
+    }
+
+    .result-title,
+    .result-score,
+    .compact-report .result-title,
+    .compact-report .result-score {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 760px) {
+    .result-title h1 {
+        max-width: 100%;
+        font-size: 2.6rem;
+    }
+
+    .result-score {
+        min-height: 260px;
     }
 }

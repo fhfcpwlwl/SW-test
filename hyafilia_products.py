@@ -75,7 +75,7 @@ PRODUCTS = {
     },
     "sunscreen": {
         "key": "sunscreen",
-        "step": "선케어",
+        "step": "자외선 차단",
         "name": "Curenex Daily Sheer Sunscreen SPF50+ PA++++ 50ml",
         "brand": "CURENEX",
         "price": "$49.99",

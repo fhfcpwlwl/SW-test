@@ -19,10 +19,6 @@
                 <span class="brand-mark"></span>
                 <span>Skin Care AI</span>
             </a>
-            <div class="status-pill">
-                <span></span>
-                Local AI Ready
-            </div>
         </header>
 
         {% if error %}
@@ -34,7 +30,7 @@
                 <p class="eyebrow">AI Skin Analysis</p>
                 <h1>피부 분석</h1>
                 <p class="hero-text">
-                    정면 얼굴 사진과 간단한 피부 문진을 바탕으로 주요 고민, 관리 우선순위,
+                    정면 얼굴 사진과 피부 성향 설문을 함께 반영해 피부 케어 점수, 관리 우선순위,
                     추천 루틴을 한 화면에서 확인하세요.
                 </p>
             </div>
@@ -52,7 +48,7 @@
                 <div class="section-heading">
                     <p class="step-label">Step 1</p>
                     <h2>얼굴 사진 업로드</h2>
-                    <p>정면 얼굴, 자연광 또는 밝은 실내 조명, 과한 보정이 없는 사진이 가장 좋습니다.</p>
+                    <p>정면 얼굴, 밝은 조명, 과한 보정이 없는 사진이 가장 안정적으로 분석됩니다.</p>
                 </div>
 
                 <label class="dropzone" for="photo">
@@ -71,96 +67,225 @@
                 </div>
             </section>
 
-            <section class="survey-panel">
-                <div class="section-heading">
+            <section class="survey-panel personality-survey">
+                <div class="section-heading survey-intro">
                     <p class="step-label">Step 2</p>
-                    <h2>피부 타입 문진</h2>
-                    <p>선택값은 사진 분석 결과를 해석하고 루틴을 추천하는 데 함께 사용됩니다.</p>
+                    <h2>피부 성향 설문</h2>
+                    <p>각 문장을 읽고 내 피부에 가까운 정도를 선택하세요.</p>
                 </div>
 
-                <div class="question-stack">
-                    <fieldset class="question-group">
-                        <legend>건성 vs 지성</legend>
-                        <div class="question-block">
-                            <p>세안 후 아무것도 바르지 않으면?</p>
-                            <label><input type="radio" name="dry_oily_1" value="A" required><span>당기고 건조하다</span></label>
-                            <label><input type="radio" name="dry_oily_1" value="B"><span>금방 번들거린다</span></label>
+                <div class="scale-question-list">
+                    <article class="scale-question">
+                        <p class="scale-statement">세안 후 아무것도 바르지 않으면 피부가 당기고 건조하게 느껴진다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="세안 후 건조감">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="dry_oily_1" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="dry_oily_1" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="dry_oily_1" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="dry_oily_1" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="dry_oily_1" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="dry_oily_1" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="dry_oily_1" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                        <div class="question-block">
-                            <p>오후 피부 상태는?</p>
-                            <label><input type="radio" name="dry_oily_2" value="A"><span>푸석하고 건조하다</span></label>
-                            <label><input type="radio" name="dry_oily_2" value="B"><span>유분이 많이 올라온다</span></label>
-                        </div>
-                        <div class="question-block">
-                            <p>모공은 주로 어떻게 보이나요?</p>
-                            <label><input type="radio" name="dry_oily_3" value="A"><span>크게 눈에 띄지 않는다</span></label>
-                            <label><input type="radio" name="dry_oily_3" value="B"><span>T존과 볼에 잘 보인다</span></label>
-                        </div>
-                    </fieldset>
+                    </article>
 
-                    <fieldset class="question-group">
-                        <legend>민감성 vs 저항성</legend>
-                        <div class="question-block">
-                            <p>화장품을 바꾸면 자극이 생기나요?</p>
-                            <label><input type="radio" name="sensitive_resistant_1" value="A" required><span>자주 생긴다</span></label>
-                            <label><input type="radio" name="sensitive_resistant_1" value="B"><span>거의 없다</span></label>
+                    <article class="scale-question">
+                        <p class="scale-statement">오후가 되면 유분이 올라와 번들거림이 눈에 띈다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="오후 유분감">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="dry_oily_2" value="B" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="dry_oily_2" value="B"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="dry_oily_2" value="B"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="dry_oily_2" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="dry_oily_2" value="A"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="dry_oily_2" value="A"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="dry_oily_2" value="A"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                        <div class="question-block">
-                            <p>피부가 쉽게 붉어지는 편인가요?</p>
-                            <label><input type="radio" name="sensitive_resistant_2" value="A"><span>그렇다</span></label>
-                            <label><input type="radio" name="sensitive_resistant_2" value="B"><span>아니다</span></label>
-                        </div>
-                        <div class="question-block">
-                            <p>가려움이나 따가움이 있나요?</p>
-                            <label><input type="radio" name="sensitive_resistant_3" value="A"><span>자주 있다</span></label>
-                            <label><input type="radio" name="sensitive_resistant_3" value="B"><span>거의 없다</span></label>
-                        </div>
-                    </fieldset>
+                    </article>
 
-                    <fieldset class="question-group">
-                        <legend>색소형 vs 비색소형</legend>
-                        <div class="question-block">
-                            <p>기미나 잡티가 잘 생기나요?</p>
-                            <label><input type="radio" name="pigmented_nonpigmented_1" value="A" required><span>잘 생긴다</span></label>
-                            <label><input type="radio" name="pigmented_nonpigmented_1" value="B"><span>거의 없다</span></label>
+                    <article class="scale-question">
+                        <p class="scale-statement">T존과 볼 주변에서 모공이 잘 보이는 편이다.</p>
+                        <p class="scale-helper">T존은 이마와 코를 잇는 T자 모양 부위이다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="모공 노출감">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="dry_oily_3" value="B" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="dry_oily_3" value="B"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="dry_oily_3" value="B"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="dry_oily_3" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="dry_oily_3" value="A"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="dry_oily_3" value="A"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="dry_oily_3" value="A"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                        <div class="question-block">
-                            <p>햇빛을 받으면 색소침착이 남나요?</p>
-                            <label><input type="radio" name="pigmented_nonpigmented_2" value="A"><span>오래 남는다</span></label>
-                            <label><input type="radio" name="pigmented_nonpigmented_2" value="B"><span>금방 돌아온다</span></label>
-                        </div>
-                        <div class="question-block">
-                            <p>여드름 자국이 오래 가나요?</p>
-                            <label><input type="radio" name="pigmented_nonpigmented_3" value="A"><span>오래 남는다</span></label>
-                            <label><input type="radio" name="pigmented_nonpigmented_3" value="B"><span>비교적 빨리 옅어진다</span></label>
-                        </div>
-                    </fieldset>
+                    </article>
 
-                    <fieldset class="question-group">
-                        <legend>주름형 vs 탄력형</legend>
-                        <div class="question-block">
-                            <p>표정 주름이 눈에 띄나요?</p>
-                            <label><input type="radio" name="wrinkled_tight_1" value="A" required><span>눈에 띈다</span></label>
-                            <label><input type="radio" name="wrinkled_tight_1" value="B"><span>거의 없다</span></label>
+                    <article class="scale-question">
+                        <p class="scale-statement">새 화장품을 사용하면 따가움, 붉어짐, 가려움이 생기는 편이다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="화장품 자극감">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="sensitive_resistant_1" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="sensitive_resistant_1" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="sensitive_resistant_1" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="sensitive_resistant_1" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="sensitive_resistant_1" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="sensitive_resistant_1" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="sensitive_resistant_1" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                        <div class="question-block">
-                            <p>피부 탄력은 어떤가요?</p>
-                            <label><input type="radio" name="wrinkled_tight_2" value="A"><span>부족한 편이다</span></label>
-                            <label><input type="radio" name="wrinkled_tight_2" value="B"><span>비교적 좋다</span></label>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">피부가 쉽게 붉어지거나 외부 자극에 빠르게 반응한다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="붉어짐 반응">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="sensitive_resistant_2" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="sensitive_resistant_2" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="sensitive_resistant_2" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="sensitive_resistant_2" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="sensitive_resistant_2" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="sensitive_resistant_2" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="sensitive_resistant_2" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                        <div class="question-block">
-                            <p>자외선 노출이 많은 편인가요?</p>
-                            <label><input type="radio" name="wrinkled_tight_3" value="A" required><span>많다</span></label>
-                            <label><input type="radio" name="wrinkled_tight_3" value="B"><span>적다</span></label>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">피부 컨디션이 바뀌어도 대부분 제품을 무난하게 사용할 수 있다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="제품 적응력">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="sensitive_resistant_3" value="B" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="sensitive_resistant_3" value="B"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="sensitive_resistant_3" value="B"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="sensitive_resistant_3" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="sensitive_resistant_3" value="A"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="sensitive_resistant_3" value="A"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="sensitive_resistant_3" value="A"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
                         </div>
-                    </fieldset>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">기미, 잡티, 여드름 자국 같은 색소 흔적이 잘 남는 편이다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="색소 흔적">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="pigmented_nonpigmented_1" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="pigmented_nonpigmented_1" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="pigmented_nonpigmented_1" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="pigmented_nonpigmented_1" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="pigmented_nonpigmented_1" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="pigmented_nonpigmented_1" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="pigmented_nonpigmented_1" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">햇빛을 받은 뒤 피부톤이 금방 돌아오기보다 오래 남는 편이다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="햇빛 후 색소">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="pigmented_nonpigmented_2" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="pigmented_nonpigmented_2" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="pigmented_nonpigmented_2" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="pigmented_nonpigmented_2" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="pigmented_nonpigmented_2" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="pigmented_nonpigmented_2" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="pigmented_nonpigmented_2" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">트러블이 지나간 뒤 붉거나 어두운 자국이 오래 지속된다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="트러블 자국 지속">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="pigmented_nonpigmented_3" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="pigmented_nonpigmented_3" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="pigmented_nonpigmented_3" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="pigmented_nonpigmented_3" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="pigmented_nonpigmented_3" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="pigmented_nonpigmented_3" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="pigmented_nonpigmented_3" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">표정 주름이나 잔주름이 눈에 띄기 시작했다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="잔주름 체감">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="wrinkled_tight_1" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="wrinkled_tight_1" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="wrinkled_tight_1" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="wrinkled_tight_1" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="wrinkled_tight_1" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="wrinkled_tight_1" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="wrinkled_tight_1" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">피부 탄력이 예전보다 부족하거나 처짐이 느껴진다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="탄력 저하">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="wrinkled_tight_2" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="wrinkled_tight_2" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="wrinkled_tight_2" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="wrinkled_tight_2" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="wrinkled_tight_2" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="wrinkled_tight_2" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="wrinkled_tight_2" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
+
+                    <article class="scale-question">
+                        <p class="scale-statement">자외선 노출이 잦거나 자외선 차단을 자주 놓치는 편이다.</p>
+                        <div class="scale-row">
+                            <span class="scale-side agree">그렇다</span>
+                            <div class="scale-options" role="radiogroup" aria-label="자외선 노출">
+                                <label class="scale-choice size-lg side-a"><input type="radio" name="wrinkled_tight_3" value="A" required><span></span></label>
+                                <label class="scale-choice size-md side-a"><input type="radio" name="wrinkled_tight_3" value="A"><span></span></label>
+                                <label class="scale-choice size-sm side-a"><input type="radio" name="wrinkled_tight_3" value="A"><span></span></label>
+                                <label class="scale-choice neutral"><input type="radio" name="wrinkled_tight_3" value="N"><span></span></label>
+                                <label class="scale-choice size-sm side-b"><input type="radio" name="wrinkled_tight_3" value="B"><span></span></label>
+                                <label class="scale-choice size-md side-b"><input type="radio" name="wrinkled_tight_3" value="B"><span></span></label>
+                                <label class="scale-choice size-lg side-b"><input type="radio" name="wrinkled_tight_3" value="B"><span></span></label>
+                            </div>
+                            <span class="scale-side disagree">그렇지 않다</span>
+                        </div>
+                    </article>
                 </div>
             </section>
 
             <section class="submit-panel">
                 <div>
                     <strong>분석 준비 완료</strong>
-                    <p>사진과 문진 답변을 함께 반영해 개인화 리포트를 생성합니다.</p>
+                    <p>사진과 설문 답변을 함께 반영해 개인화 리포트를 생성합니다.</p>
                 </div>
                 <button id="submitButton" type="submit">리포트 생성</button>
             </section>
