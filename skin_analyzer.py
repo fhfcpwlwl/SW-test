@@ -236,14 +236,66 @@ def _classify_answer_group(form: dict, key: str, a_label: str, a_name: str, b_la
     return {"code": b_label, "label": b_name}
 
 
+def _build_skin_tendency_summary(
+    dry_oily: dict,
+    sensitive_resistant: dict,
+    pigmented_nonpigmented: dict,
+    wrinkled_tight: dict,
+) -> str:
+    """Explain the skin tendency result in user-friendly Korean."""
+    moisture_text = (
+        "세안 후 건조함이나 당김을 느끼기 쉬운 편이고"
+        if dry_oily.get("code") == "D"
+        else "오후에 유분과 번들거림이 올라오기 쉬운 편이고"
+    )
+    sensitivity_text = (
+        "새 제품이나 외부 자극에 비교적 민감하게 반응할 수 있습니다"
+        if sensitive_resistant.get("code") == "S"
+        else "대부분의 제품과 환경 변화에는 비교적 안정적으로 반응하는 편입니다"
+    )
+    pigment_text = (
+        " 트러블 자국이나 색소 흔적은 오래 남기 쉬워 자외선 차단과 진정 관리가 중요합니다."
+        if pigmented_nonpigmented.get("code") == "P"
+        else " 색소 흔적은 비교적 덜 남는 편이지만, 자외선 차단은 꾸준히 유지하는 것이 좋습니다."
+    )
+    elasticity_text = (
+        " 탄력과 잔주름 관리도 함께 신경 쓰면 좋습니다."
+        if wrinkled_tight.get("code") == "W"
+        else " 현재는 탄력 저하 신호가 크지 않아 기본 보습과 자외선 차단을 유지하면 좋습니다."
+    )
+    return f"설문으로 보면 피부는 {moisture_text}, {sensitivity_text}.{pigment_text}{elasticity_text}"
+
+
+def _build_skin_type_label(
+    dry_oily: dict,
+    sensitive_resistant: dict,
+    pigmented_nonpigmented: dict,
+    wrinkled_tight: dict,
+) -> str:
+    """Create a concise Korean skin type label for the result page."""
+    moisture = "건성형" if dry_oily.get("code") == "D" else "지성형"
+    sensitivity = "민감형" if sensitive_resistant.get("code") == "S" else "안정형"
+    pigment = "색소형" if pigmented_nonpigmented.get("code") == "P" else "맑은피부형"
+    elasticity = "탄력관리형" if wrinkled_tight.get("code") == "W" else "탄력안정형"
+    return f"{moisture}, {sensitivity}, {pigment}, {elasticity}"
+
+
 def parse_skin_mbti(form: dict) -> dict:
     """Parse skin questionnaire answers into a skin MBTI style code."""
-    dry_oily = _classify_answer_group(form, "dry_oily", "D", "Dry", "O", "Oily")
-    sensitive_resistant = _classify_answer_group(form, "sensitive_resistant", "S", "Sensitive", "R", "Resistant")
-    pigmented_nonpigmented = _classify_answer_group(form, "pigmented_nonpigmented", "P", "Pigmented", "N", "Non-pigmented")
-    wrinkled_tight = _classify_answer_group(form, "wrinkled_tight", "W", "Wrinkled", "T", "Tight")
+    dry_oily = _classify_answer_group(form, "dry_oily", "D", "건조함을 느끼기 쉬운 편", "O", "유분이 올라오기 쉬운 편")
+    sensitive_resistant = _classify_answer_group(
+        form, "sensitive_resistant", "S", "자극에 민감한 편", "R", "피부 반응이 비교적 안정적인 편"
+    )
+    pigmented_nonpigmented = _classify_answer_group(
+        form, "pigmented_nonpigmented", "P", "색소 흔적이 남기 쉬운 편", "N", "색소 흔적이 덜 남는 편"
+    )
+    wrinkled_tight = _classify_answer_group(
+        form, "wrinkled_tight", "W", "탄력과 잔주름 관리가 필요한 편", "T", "탄력이 비교적 안정적인 편"
+    )
     return {
         "code": f"{dry_oily['code']}{sensitive_resistant['code']}{pigmented_nonpigmented['code']}{wrinkled_tight['code']}",
+        "type_label": _build_skin_type_label(dry_oily, sensitive_resistant, pigmented_nonpigmented, wrinkled_tight),
+        "summary": _build_skin_tendency_summary(dry_oily, sensitive_resistant, pigmented_nonpigmented, wrinkled_tight),
         "dry_oily": dry_oily,
         "sensitive_resistant": sensitive_resistant,
         "pigmented_nonpigmented": pigmented_nonpigmented,
@@ -575,8 +627,8 @@ def build_pytorch_routine(
         morning.append("AI 신뢰도가 낮은 편이므로 오늘은 자극적인 기능성 제품보다 진정과 보습 위주로 단순하게 유지합니다.")
         evening.append("분석 신뢰도가 낮아 밤에는 새 제품을 늘리기보다 기존 진정 루틴을 유지합니다.")
     elif skin_score and skin_score < 60:
-        morning.append("AI 피부 점수가 낮게 나와 낮 동안 보습막을 얇게 유지하고 손으로 만지는 자극을 줄입니다.")
-        evening.append("AI 피부 점수가 낮게 나와 밤에는 트러블 부위 케어 후 보습 단계를 충분히 가져갑니다.")
+        morning.append("AI가 집중 케어가 필요한 상태로 판단해 낮 동안 보습막을 얇게 유지하고 손으로 만지는 자극을 줄입니다.")
+        evening.append("AI가 집중 케어가 필요한 상태로 판단해 밤에는 트러블 부위 케어 후 보습 단계를 충분히 가져갑니다.")
     elif prediction_route == "healthy" and skin_score >= 85:
         morning.append("AI가 안정적인 피부 상태로 판단했으므로 아침 루틴은 가볍게 유지합니다.")
         evening.append("안정적인 상태를 유지할 수 있게 밤에는 세안과 보습을 과하게 늘리지 않습니다.")

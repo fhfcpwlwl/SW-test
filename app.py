@@ -28,6 +28,8 @@ DEFAULT_RESULT = {
     "advice": [],
     "skin_mbti": {
         "code": "UNKNOWN",
+        "type_label": "설문 결과 없음",
+        "summary": "설문 결과를 불러오지 못했습니다.",
         "dry_oily": {"label": "-"},
         "sensitive_resistant": {"label": "-"},
         "pigmented_nonpigmented": {"label": "-"},
@@ -35,6 +37,7 @@ DEFAULT_RESULT = {
     },
     "report": {
         "overall_score": 0,
+        "overall_status": "분석 대기",
         "overall_level": "분석 준비 중",
         "summary": "아직 분석 결과가 없습니다.",
         "top_concerns": [],

@@ -39,23 +39,21 @@
     <main class="page-shell">
         <section class="result-hero compact-report">
             <div class="result-title">
-                <span class="eyebrow">Analysis summary</span>
                 <h1>{{ display_prediction }}</h1>
                 <p>{{ prediction_note }} 이 결과는 의료 진단이 아니라 스킨케어 참고용 분석입니다.</p>
             </div>
             <div class="result-score">
-                <span>Skin Score</span>
-                <strong>{{ result.report.overall_score }}</strong>
-                <small>{{ result.analysis.pytorch_confidence }}% AI 판정 신뢰도</small>
+                <span>AI 신뢰도</span>
+                <strong>{{ result.analysis.pytorch_confidence }}%</strong>
+                <small>사진 기반 판정 신뢰도</small>
             </div>
         </section>
 
         <section class="content-card analysis-explainer">
             <div class="section-head">
-                <span class="step-label">AI Logic</span>
                 <div>
                     <h2>AI가 결과를 정리하는 방식</h2>
-                    <p>사진을 먼저 분류한 뒤, 트러블 경향이 감지되면 점수와 관리 우선순위를 더 보수적으로 계산합니다.</p>
+                    <p>사진을 먼저 분류한 뒤, 정상 피부 경향인지 트러블 관리가 필요한 상태인지 쉽게 이해할 수 있게 정리합니다.</p>
                 </div>
             </div>
 
@@ -75,31 +73,19 @@
                 <article class="pipeline-card emphasis">
                     <span>03</span>
                     <strong>{{ prediction_route }}</strong>
-                    <p>{{ display_prediction }} 결과를 기준으로 점수와 루틴을 구성합니다.</p>
+                    <p>{{ display_prediction }} 결과를 기준으로 상태와 루틴을 구성합니다.</p>
                 </article>
             </div>
 
             <div class="penalty-panel">
                 <div>
-                    <h3>점수 해석</h3>
-                    <p>높은 점수는 현재 사진이 안정적인 피부 패턴에 가깝다는 뜻이고, 낮은 점수는 진정/트러블 케어 우선순위가 높다는 뜻입니다.</p>
+                    <h3>결과 해석</h3>
+                    <p>숫자 점수보다 현재 상태를 먼저 볼 수 있도록 정리했습니다. 정상 피부 경향이면 기본 관리 유지, 트러블 관리 필요라면 진정과 국소 케어를 우선합니다.</p>
                 </div>
-                <div class="score-bars" aria-label="점수 구간 설명">
-                    <div class="score-bar-row">
-                        <span>안정</span>
-                        <div class="score-bar"><i style="width: 86%"></i></div>
-                        <strong>85-100</strong>
-                    </div>
-                    <div class="score-bar-row">
-                        <span>관찰</span>
-                        <div class="score-bar caution"><i style="width: 62%"></i></div>
-                        <strong>60-84</strong>
-                    </div>
-                    <div class="score-bar-row">
-                        <span>집중 케어</span>
-                        <div class="score-bar alert"><i style="width: 38%"></i></div>
-                        <strong>0-59</strong>
-                    </div>
+                <div class="status-guide" aria-label="피부 상태 설명">
+                    <p><strong>정상 피부 경향</strong> 기본 루틴을 유지해도 좋은 상태입니다.</p>
+                    <p><strong>트러블 관리 필요</strong> 진정, 보습, 국소 케어를 우선하는 것이 좋습니다.</p>
+                    <p><strong>관찰 필요</strong> 사진 조건이나 피부 컨디션을 함께 확인해 주세요.</p>
                 </div>
             </div>
         </section>
@@ -107,7 +93,6 @@
         <section class="routine-grid">
             <article class="content-card">
                 <div class="section-head">
-                    <span class="step-label">AM</span>
                     <div>
                         <h2>오전 루틴</h2>
                     </div>
@@ -121,7 +106,6 @@
 
             <article class="content-card">
                 <div class="section-head">
-                    <span class="step-label">PM</span>
                     <div>
                         <h2>오후 루틴</h2>
                     </div>
@@ -136,7 +120,6 @@
 
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Products</span>
                 <div>
                     <h2>제품 추천</h2>
                 </div>
@@ -148,7 +131,6 @@
                         <img src="{{ item.image_url }}" alt="{{ item.name }}">
                     </div>
                     <div class="product-copy">
-                        <span>Recommended {{ loop.index }}</span>
                         <strong>{{ item.name }}</strong>
                         <small>{{ item.brand }} · {{ item.price }}</small>
                     </div>
@@ -159,59 +141,18 @@
 
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Survey</span>
                 <div>
-                    <h2>피부 MBTI 설문 결과</h2>
-                    <p>사진 분석과 함께 반영된 설문 기반 피부 성향입니다.</p>
+                    <h2>설문 기반 피드백</h2>
                 </div>
             </div>
-            <div class="metric-grid mbti-grid">
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>피부 타입 코드</strong>
-                        <span>MBTI</span>
-                    </div>
-                    <div class="metric-value">{{ result.skin_mbti.code }}</div>
-                    <small>설문 응답 기반</small>
-                </article>
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>유수분 경향</strong>
-                        <span>{{ result.skin_mbti.dry_oily.code }}</span>
-                    </div>
-                    <div class="metric-value">{{ result.skin_mbti.dry_oily.label }}</div>
-                    <small>건성/지성 경향</small>
-                </article>
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>민감도</strong>
-                        <span>{{ result.skin_mbti.sensitive_resistant.code }}</span>
-                    </div>
-                    <div class="metric-value">{{ result.skin_mbti.sensitive_resistant.label }}</div>
-                    <small>민감성/저항성 경향</small>
-                </article>
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>색소 경향</strong>
-                        <span>{{ result.skin_mbti.pigmented_nonpigmented.code }}</span>
-                    </div>
-                    <div class="metric-value">{{ result.skin_mbti.pigmented_nonpigmented.label }}</div>
-                    <small>색소 흔적 경향</small>
-                </article>
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>탄력/주름 경향</strong>
-                        <span>{{ result.skin_mbti.wrinkled_tight.code }}</span>
-                    </div>
-                    <div class="metric-value">{{ result.skin_mbti.wrinkled_tight.label }}</div>
-                    <small>주름/탄력 관리 경향</small>
-                </article>
-            </div>
+            <p class="survey-summary-line">
+                <strong>{{ result.skin_mbti.type_label }}</strong>
+                {{ result.skin_mbti.summary }}
+            </p>
         </section>
 
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Details</span>
                 <div>
                     <h2>상세 정보</h2>
                 </div>
@@ -223,14 +164,9 @@
                     <p>원본 라벨: {{ raw_prediction }}</p>
                 </article>
                 <article class="snapshot-card">
-                    <span class="card-label">우선 관리</span>
-                    {% if result.report.top_concerns %}
-                    <strong>{{ result.report.top_concerns[0].label }}</strong>
-                    <p>{{ result.report.top_concerns[0].score }}</p>
-                    {% else %}
-                    <strong>기본 관리</strong>
-                    <p>routine</p>
-                    {% endif %}
+                    <span class="card-label">피부 타입</span>
+                    <strong>{{ result.skin_mbti.type_label }}</strong>
+                    <p>설문 응답을 바탕으로 정리한 피부 성향입니다.</p>
                 </article>
                 <article class="snapshot-card photo-card">
                     <span class="card-label">업로드 사진</span>
@@ -258,7 +194,6 @@
 
         <section class="content-card">
             <div class="section-head">
-                <span class="step-label">Memo</span>
                 <div>
                     <h2>메모</h2>
                 </div>

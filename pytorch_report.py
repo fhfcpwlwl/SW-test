@@ -4,45 +4,39 @@ from typing import Any, Dict, List
 from skin_analyzer import build_pytorch_product_recommendations, build_pytorch_routine, clamp_score, score_to_level
 
 
-def build_pytorch_condition_cards(analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Turn PyTorch and CV outputs into explainable result cards."""
+def classify_skin_status(analysis: Dict[str, Any], skin_score: float) -> str:
+    """Return a user-facing skin status instead of a numeric score."""
+    prediction_route = analysis.get("prediction_route", "unknown")
+    if prediction_route == "not_skin":
+        return "재촬영 권장"
+    if prediction_route == "healthy" and skin_score >= 60:
+        return "정상 피부 경향"
+    if prediction_route == "acne" or skin_score < 60:
+        return "트러블 관리 필요"
+    return "관찰 필요"
+
+
+def build_pytorch_condition_cards(analysis: Dict[str, Any], skin_status: str) -> List[Dict[str, Any]]:
+    """Turn PyTorch outputs into user-facing result cards."""
     skin_score = clamp_score(float(analysis.get("skin_score", analysis.get("pytorch_confidence", 0))))
     confidence = clamp_score(float(analysis.get("pytorch_confidence", 0)))
-    acne_count = int(analysis.get("acne_count", 0) or 0)
-    severity_ratio = float(analysis.get("severity_ratio", 0) or 0)
 
     return [
         {
-            "key": "skin_score",
-            "label": "피부 케어 점수",
-            "score": skin_score,
+            "key": "skin_status",
+            "label": "피부 상태",
+            "score": skin_status,
             "level": score_to_level(skin_score),
-            "focus_area": "종합 점수",
-            "description": "AI 분류와 트러블 면적 분석을 함께 반영한 케어 점수입니다.",
+            "focus_area": "사진 분석 결과",
+            "description": "AI가 사진에서 감지한 피부 상태를 사용자가 이해하기 쉬운 말로 정리했습니다.",
         },
         {
             "key": "ai_confidence",
             "label": "AI 판정 신뢰도",
-            "score": confidence,
+            "score": f"{confidence}%",
             "level": score_to_level(confidence),
             "focus_area": "모델 확신도",
             "description": "AI가 현재 판정을 얼마나 강하게 선택했는지 보여줍니다.",
-        },
-        {
-            "key": "acne_count",
-            "label": "트러블 후보 개수",
-            "score": acne_count,
-            "level": "참고",
-            "focus_area": "OpenCV 감점",
-            "description": "피부 영역에서 붉은 트러블 후보로 감지된 작은 영역 수입니다.",
-        },
-        {
-            "key": "severity_ratio",
-            "label": "트러블 면적 비율",
-            "score": round(severity_ratio, 2),
-            "level": "참고",
-            "focus_area": "OpenCV 감점",
-            "description": "피부 영역 대비 붉은 트러블 후보 면적 비율입니다.",
         },
     ]
 
@@ -52,8 +46,9 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
     predicted_class = analysis.get("pytorch_predicted_class", "unknown")
     confidence = clamp_score(float(analysis.get("pytorch_confidence", 0)))
     skin_score = clamp_score(float(analysis.get("skin_score", confidence)))
-    cards = build_pytorch_condition_cards(analysis)
-    top_concerns = cards[:3]
+    skin_status = classify_skin_status(analysis, skin_score)
+    cards = build_pytorch_condition_cards(analysis, skin_status)
+    top_concerns = cards[:2]
     products = build_pytorch_product_recommendations(skin_mbti, analysis)
 
     if skin_score >= 85:
@@ -65,11 +60,12 @@ def build_pytorch_personalized_report(analysis: Dict[str, Any], skin_mbti: Dict[
 
     summary = (
         f"AI가 이번 사진을 {predicted_class} 클래스로 분류했습니다. "
-        f"판정 신뢰도는 {confidence}%이고, 트러블 면적 분석을 반영한 피부 케어 점수는 {skin_score}점입니다."
+        f"현재 결과는 {skin_status}으로 정리되며, 판정 신뢰도는 {confidence}%입니다."
     )
 
     return {
         "overall_score": skin_score,
+        "overall_status": skin_status,
         "overall_level": overall_level,
         "summary": summary,
         "top_concerns": top_concerns,
