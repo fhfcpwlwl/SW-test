@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: skin-analysis-demo
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn deploy_app:app --bind 0.0.0.0:$PORT --timeout 180
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PYTORCH_MODEL_PATH
+        value: model/skin_model_best.pth
+      - key: PYTORCH_MODEL_LABELS
+        value: acne,normal
+      - key: FLASK_DEBUG
+        value: "False"
+      - key: LOG_LEVEL
+        value: INFO

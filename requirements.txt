@@ -3,13 +3,14 @@ Flask==2.3.0
 FastAPI==0.104.0
 uvicorn==0.24.0
 python-multipart==0.0.6
+gunicorn==23.0.0
 
 # HTTP Client
 requests==2.31.0
 
 # Image Processing
 Pillow==10.0.0
-opencv-python==4.8.0.76
+opencv-python-headless==4.8.0.76
 
 # Data Science & ML
 numpy==1.26.4
