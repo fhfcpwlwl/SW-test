@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -10,26 +10,151 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% macro routine_action_svg(action_key) -%}
+    <svg class="routine-action-svg action-{{ action_key|replace('_', '-') }}" viewBox="0 0 240 240" role="img" aria-label="루틴 행동 일러스트">
+        <rect class="svg-card" x="24" y="24" width="192" height="192" rx="30"></rect>
+        <circle class="svg-orbit svg-orbit-main" cx="176" cy="58" r="18"></circle>
+        <circle class="svg-orbit svg-orbit-soft" cx="58" cy="184" r="14"></circle>
+
+        {% if action_key == "cleanser" %}
+        <path class="svg-fill skin" d="M74 154c18-18 44-18 62 0v15H74z"></path>
+        <path class="svg-stroke" d="M70 142c17-19 50-19 67 0"></path>
+        <path class="svg-stroke accent" d="M55 92c18 13 39 13 57 0s39-13 57 0"></path>
+        <path class="svg-stroke accent" d="M50 113c15 10 32 10 47 0s32-10 47 0 32 10 47 0"></path>
+        <path class="svg-fill hand" d="M54 151c18-4 35 6 40 21l-34 10c-10-7-14-17-6-31z"></path>
+        <path class="svg-fill hand" d="M153 172c5-15 22-25 40-21 8 14 4 24-6 31z"></path>
+        <circle class="svg-fill bubble" cx="69" cy="71" r="8"></circle>
+        <circle class="svg-fill bubble" cx="150" cy="69" r="6"></circle>
+
+        {% elif action_key == "soothing_toner" %}
+        <rect class="svg-fill bottle" x="54" y="76" width="42" height="92" rx="12"></rect>
+        <rect class="svg-fill cap" x="63" y="60" width="24" height="18" rx="6"></rect>
+        <circle class="svg-fill pad" cx="145" cy="118" r="34"></circle>
+        <path class="svg-stroke" d="M119 142c18 15 51 13 70-5"></path>
+        <path class="svg-fill hand" d="M129 157c20-11 44-5 55 13l-42 16c-14-3-19-13-13-29z"></path>
+        <path class="svg-stroke accent" d="M63 119h24"></path>
+
+        {% elif action_key == "moisture_ampoule" %}
+        <path class="svg-fill dropper" d="M73 63l82 50-13 22-82-50z"></path>
+        <path class="svg-fill cap" d="M148 103l25 15-16 26-25-15z"></path>
+        <path class="svg-fill drop" d="M139 154c11 16 19 28 19 39a19 19 0 0 1-38 0c0-11 8-23 19-39z"></path>
+        <path class="svg-stroke accent" d="M73 158c13 16 33 26 55 27"></path>
+        <circle class="svg-fill bubble" cx="91" cy="132" r="7"></circle>
+
+        {% elif action_key == "soothing_cream" %}
+        <rect class="svg-fill jar" x="66" y="122" width="104" height="54" rx="16"></rect>
+        <path class="svg-fill cap" d="M83 101h70c10 0 18 8 18 18v5H65v-5c0-10 8-18 18-18z"></path>
+        <path class="svg-fill cream" d="M82 133c20 10 51 10 72 0v19H82z"></path>
+        <path class="svg-fill hand" d="M48 88c27 2 45 17 52 42l-35 12c-13-10-21-27-17-54z"></path>
+        <path class="svg-stroke accent" d="M112 81c24 7 43 23 56 48"></path>
+
+        {% elif action_key == "blemish_cream" %}
+        <circle class="svg-fill skin" cx="104" cy="121" r="46"></circle>
+        <circle class="svg-fill spot" cx="96" cy="111" r="6"></circle>
+        <circle class="svg-fill spot" cx="117" cy="132" r="5"></circle>
+        <path class="svg-fill applicator" d="M137 81l45 45-19 19-45-45z"></path>
+        <circle class="svg-fill cap" cx="153" cy="105" r="11"></circle>
+        <path class="svg-stroke accent" d="M79 170c24 15 58 15 82 0"></path>
+
+        {% elif action_key == "retinol" %}
+        <path class="svg-fill moon" d="M161 57a41 41 0 1 0 26 70 48 48 0 0 1-26-70z"></path>
+        <rect class="svg-fill bottle" x="74" y="92" width="58" height="90" rx="16"></rect>
+        <rect class="svg-fill cap" x="89" y="70" width="28" height="24" rx="8"></rect>
+        <path class="svg-stroke accent" d="M87 132h32"></path>
+        <path class="svg-fill sparkle" d="M57 74l8 17 17 8-17 8-8 17-8-17-17-8 17-8z"></path>
+        <circle class="svg-fill bubble" cx="179" cy="153" r="6"></circle>
+
+        {% elif action_key == "sunscreen" %}
+        <circle class="svg-fill sun" cx="169" cy="70" r="24"></circle>
+        <path class="svg-stroke sun-ray" d="M169 31v16M169 93v16M130 70h16M192 70h16M141 42l11 11M186 87l11 11M197 42l-11 11M152 87l-11 11"></path>
+        <path class="svg-fill shield" d="M67 88l49-18 49 18v39c0 36-22 58-49 70-27-12-49-34-49-70z"></path>
+        <path class="svg-stroke shield-mark" d="M94 129l17 17 34-40"></path>
+
+        {% else %}
+        <path class="svg-fill shield" d="M70 80h100v88H70z"></path>
+        <path class="svg-stroke shield-mark" d="M91 126l20 20 41-48"></path>
+        {% endif %}
+    </svg>
+    {%- endmacro %}
+
     {% set raw_prediction = result.analysis.pytorch_predicted_class|string %}
     {% set prediction_route_key = result.analysis.prediction_route|default("") %}
     {% if prediction_route_key == "acne" %}
         {% set display_prediction = "피부 트러블 의심" %}
         {% set prediction_route = "트러블 케어 경로" %}
         {% set prediction_note = "사진에서 여드름성 트러블 또는 피부 고민 패턴이 더 강하게 감지되었습니다." %}
+        {% set detail_skin_status = "여드름성 피부" %}
+        {% set detail_skin_badge = "주의" %}
+        {% set status_tone = "is-caution" %}
+        {% set detail_grade = "집중 관리 필요" %}
+        {% set detail_grade_note = "트러블 케어 우선순위 매핑" %}
+        {% set care_priority_label = "집중 케어 우선" %}
+        {% set care_priority_note = "진정·보습·국소 케어 중심으로 관리" %}
+        {% set priority_step_1 = "진정" %}
+        {% set priority_step_2 = "보습" %}
+        {% set priority_step_3 = "국소 케어" %}
     {% elif prediction_route_key == "healthy" %}
         {% set display_prediction = "정상 피부 경향" %}
         {% set prediction_route = "정상 피부 경로" %}
         {% set prediction_note = "사진에서 정상 피부에 가까운 패턴이 더 강하게 감지되었습니다." %}
+        {% set detail_skin_status = "정상 피부" %}
+        {% set detail_skin_badge = "안정" %}
+        {% set status_tone = "is-stable" %}
+        {% set detail_grade = "기본 관리 유지" %}
+        {% set detail_grade_note = "피부 안정도 기준 매핑" %}
+        {% set care_priority_label = "기본 케어 유지" %}
+        {% set care_priority_note = "보습·자외선 차단 중심으로 유지" %}
+        {% set priority_step_1 = "수분 채우기" %}
+        {% set priority_step_2 = "자외선 막기" %}
+        {% set priority_step_3 = "가볍게 유지" %}
     {% elif prediction_route_key == "not_skin" %}
         {% set display_prediction = "분석 보류" %}
         {% set prediction_route = "이미지 재확인 경로" %}
         {% set prediction_note = "피부 영역이 충분히 감지되지 않아 정면 얼굴 사진으로 다시 촬영하는 것이 좋습니다." %}
+        {% set detail_skin_status = "재촬영 필요" %}
+        {% set detail_skin_badge = "확인" %}
+        {% set status_tone = "is-check" %}
+        {% set detail_grade = "분석 보류" %}
+        {% set detail_grade_note = "이미지 품질 재확인" %}
+        {% set care_priority_label = "재촬영 후 확인" %}
+        {% set care_priority_note = "정면 얼굴 사진으로 다시 분석" %}
+        {% set priority_step_1 = "정면 사진" %}
+        {% set priority_step_2 = "재촬영" %}
+        {% set priority_step_3 = "재분석" %}
     {% else %}
         {% set display_prediction = raw_prediction %}
         {% set prediction_route = "AI 분류 경로" %}
         {% set prediction_note = "사진 기반 AI 모델이 가장 가까운 피부 패턴을 선택했습니다." %}
+        {% set detail_skin_status = raw_prediction %}
+        {% set detail_skin_badge = "확인" %}
+        {% set status_tone = "is-check" %}
+        {% set detail_grade = result.report.overall_level|default("관찰 필요") %}
+        {% set detail_grade_note = "AI 분류 결과 매핑" %}
+        {% set care_priority_label = "상태 관찰 우선" %}
+        {% set care_priority_note = "사진·설문 결과를 함께 확인" %}
+        {% set priority_step_1 = "사진" %}
+        {% set priority_step_2 = "설문" %}
+        {% set priority_step_3 = "관찰" %}
     {% endif %}
-
+    {% set oil_code = result.skin_mbti.dry_oily.code|default("") %}
+    {% if oil_code == "O" %}
+        {% set oil_balance_label = "지성 피부 (유분형)" %}
+    {% elif oil_code == "D" %}
+        {% set oil_balance_label = "건성 피부 (수분 부족형)" %}
+    {% else %}
+        {% set oil_balance_label = result.skin_mbti.dry_oily.label|default("유수분 정보 없음") %}
+    {% endif %}
+    {% set sensitivity_code = result.skin_mbti.sensitive_resistant.code|default("") %}
+    {% if sensitivity_code == "S" %}
+        {% set sensitivity_label = "민감성 피부 (진정 필요)" %}
+    {% elif sensitivity_code == "R" %}
+        {% set sensitivity_label = "안정형 피부" %}
+    {% else %}
+        {% set sensitivity_label = result.skin_mbti.sensitive_resistant.label|default("민감도 정보 없음") %}
+    {% endif %}
+    {% if sensitivity_label in ["Unknown", "unknown", "", "-"] %}
+        {% set sensitivity_label = "민감도 설문 정보 부족" %}
+    {% endif %}
     <div class="top-strip">Skin Care AI Report</div>
 
     <header class="site-header">
@@ -37,88 +162,226 @@
     </header>
 
     <main class="page-shell">
-        <section class="result-hero compact-report">
+        <section class="result-hero compact-report skinguard-summary">
             <div class="result-title">
+                <span class="hero-kicker">ANALYSIS SUMMARY</span>
                 <h1>{{ display_prediction }}</h1>
-                <p>{{ prediction_note }} 이 결과는 의료 진단이 아니라 스킨케어 참고용 분석입니다.</p>
-            </div>
-            <div class="result-score">
-                <span>AI 신뢰도</span>
-                <strong>{{ result.analysis.pytorch_confidence }}%</strong>
-                <small>사진 기반 판정 신뢰도</small>
+                <p>{{ prediction_note }} 진정 및 집중 루틴을 기준으로 현재 상태를 정리했습니다.</p>
             </div>
         </section>
 
-        <section class="content-card analysis-explainer">
-            <div class="section-head">
-                <div>
-                    <h2>AI가 결과를 정리하는 방식</h2>
-                    <p>사진을 먼저 분류한 뒤, 정상 피부 경향인지 트러블 관리가 필요한 상태인지 쉽게 이해할 수 있게 정리합니다.</p>
-                </div>
+        <section class="analysis-detail-summary detailed-info-section">
+            <div class="detail-heading">
+                <h2>상세 정보</h2>
             </div>
 
-            <div class="pipeline-flow">
-                <article class="pipeline-card">
-                    <span>01</span>
-                    <strong>이미지 품질 확인</strong>
-                    <p>얼굴 사진, 밝기, 피부 영역이 분석 가능한지 먼저 확인합니다.</p>
+            <div class="detail-summary-grid result-source-grid">
+                <article class="detail-summary-card source-summary-card is-status-card">
+                    <div class="detail-card-top">
+                        <span>피부 상태</span>
+                        <em class="{{ status_tone }}">AI 기반</em>
+                    </div>
+                    <div class="source-card-title">
+                        <i class="title-icon status-icon" aria-hidden="true"></i>
+                        <strong>{{ detail_skin_status }}</strong>
+                    </div>
+                    <div class="detail-visual-panel">
+                        <div class="detail-meter status-meter {{ status_tone }}">
+                            <span class="meter-label">주의</span>
+                            <div><i></i></div>
+                            <span class="meter-label">안정</span>
+                        </div>
+                    </div>
                 </article>
-                <div class="flow-arrow" aria-hidden="true">→</div>
-                <article class="pipeline-card active">
-                    <span>02</span>
-                    <strong>AI 피부 분류</strong>
-                    <p>모델이 정상 피부와 트러블 패턴 중 더 가까운 경로를 선택합니다.</p>
+                <article class="detail-summary-card source-summary-card is-grade-card">
+                    <div class="detail-card-top">
+                        <span>분석 등급</span>
+                        <em>AI 기반</em>
+                    </div>
+                    <div class="source-card-title">
+                        <i class="title-icon grade-icon" aria-hidden="true"></i>
+                        <strong>{{ detail_grade }}</strong>
+                    </div>
+                    <div class="detail-visual-panel">
+                        <div class="priority-flow">
+                            <span>{{ priority_step_1 }}</span>
+                            <i></i>
+                            <span>{{ priority_step_2 }}</span>
+                            <i></i>
+                            <span>{{ priority_step_3 }}</span>
+                        </div>
+                    </div>
                 </article>
-                <div class="flow-arrow" aria-hidden="true">→</div>
-                <article class="pipeline-card emphasis">
-                    <span>03</span>
-                    <strong>{{ prediction_route }}</strong>
-                    <p>{{ display_prediction }} 결과를 기준으로 상태와 루틴을 구성합니다.</p>
+                <article class="detail-summary-card source-summary-card is-balance-card">
+                    <div class="detail-card-top">
+                        <span>유수분 밸런스</span>
+                        <em class="neutral">설문 기반</em>
+                    </div>
+                    <div class="source-card-title">
+                        <i class="title-icon balance-icon" aria-hidden="true"></i>
+                        <strong>{{ oil_balance_label }}</strong>
+                    </div>
+                    <div class="detail-visual-panel">
+                        <div class="balance-meter {% if oil_code == 'O' %}is-oily{% elif oil_code == 'D' %}is-dry{% else %}is-balanced{% endif %}">
+                            <span class="meter-label moisture">수분</span>
+                            <div><i></i></div>
+                            <span class="meter-label oil">유분</span>
+                        </div>
+                    </div>
                 </article>
-            </div>
-
-            <div class="penalty-panel">
-                <div>
-                    <h3>결과 해석</h3>
-                    <p>숫자 점수보다 현재 상태를 먼저 볼 수 있도록 정리했습니다. 정상 피부 경향이면 기본 관리 유지, 트러블 관리 필요라면 진정과 국소 케어를 우선합니다.</p>
-                </div>
-                <div class="status-guide" aria-label="피부 상태 설명">
-                    <p><strong>정상 피부 경향</strong> 기본 루틴을 유지해도 좋은 상태입니다.</p>
-                    <p><strong>트러블 관리 필요</strong> 진정, 보습, 국소 케어를 우선하는 것이 좋습니다.</p>
-                    <p><strong>관찰 필요</strong> 사진 조건이나 피부 컨디션을 함께 확인해 주세요.</p>
-                </div>
+                <article class="detail-summary-card source-summary-card is-sensitive-card">
+                    <div class="detail-card-top">
+                        <span>피부 민감도</span>
+                        <em class="is-caution">설문 기반</em>
+                    </div>
+                    <div class="source-card-title">
+                        <i class="title-icon sensitive-icon" aria-hidden="true"></i>
+                        <strong>{{ sensitivity_label }}</strong>
+                    </div>
+                    <div class="detail-visual-panel">
+                        <div class="detail-meter sensitivity-meter {% if sensitivity_code == 'S' %}is-high{% elif sensitivity_code == 'R' %}is-low{% else %}is-mid{% endif %}">
+                            <span class="meter-label">낮음</span>
+                            <div><i></i></div>
+                            <span class="meter-label">높음</span>
+                        </div>
+                    </div>
+                </article>
             </div>
         </section>
 
-        <section class="routine-grid">
-            <article class="content-card">
+        <section class="routine-grid routine-stepper-grid">
+            {% set morning_steps = namespace(count=0) %}
+            {% for step in result.report.routine.morning %}
+                {% set matched = namespace(item=None) %}
+                {% for item in result.report.product_recommendations %}
+                    {% set product_name = item.name|default("") %}
+                    {% set display_name = item.display_name|default("") %}
+                    {% set product_title = item.recommendation_title|default(display_name|default(product_name)) %}
+                    {% if matched.item is none and ((product_name and product_name in step) or (display_name and display_name in step) or (product_title and product_title in step)) %}
+                        {% set matched.item = item %}
+                    {% endif %}
+                {% endfor %}
+                {% if matched.item %}
+                    {% set morning_steps.count = morning_steps.count + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            {% set evening_steps = namespace(count=0) %}
+            {% for step in result.report.routine.evening %}
+                {% set matched = namespace(item=None) %}
+                {% for item in result.report.product_recommendations %}
+                    {% set product_name = item.name|default("") %}
+                    {% set display_name = item.display_name|default("") %}
+                    {% set product_title = item.recommendation_title|default(display_name|default(product_name)) %}
+                    {% if matched.item is none and ((product_name and product_name in step) or (display_name and display_name in step) or (product_title and product_title in step)) %}
+                        {% set matched.item = item %}
+                    {% endif %}
+                {% endfor %}
+                {% if matched.item %}
+                    {% set evening_steps.count = evening_steps.count + 1 %}
+                {% endif %}
+            {% endfor %}
+
+            <article class="content-card routine-stepper" data-routine-carousel>
                 <div class="section-head">
                     <div>
                         <h2>오전 루틴</h2>
                     </div>
+                    <span class="routine-counter">
+                        <b data-routine-current>1</b>
+                        <small>/ {{ morning_steps.count }}</small>
+                    </span>
                 </div>
-                <ol class="routine-list">
+                <div class="routine-slide-frame">
+                    {% set morning_render = namespace(index=0) %}
                     {% for step in result.report.routine.morning %}
-                    <li>{{ step }}</li>
+                    {% set matched = namespace(item=None) %}
+                    {% for item in result.report.product_recommendations %}
+                        {% set product_name = item.name|default("") %}
+                        {% set display_name = item.display_name|default("") %}
+                        {% set product_title = item.recommendation_title|default(display_name|default(product_name)) %}
+                        {% if matched.item is none and ((product_name and product_name in step) or (display_name and display_name in step) or (product_title and product_title in step)) %}
+                            {% set matched.item = item %}
+                        {% endif %}
                     {% endfor %}
-                </ol>
+                    {% if matched.item %}
+                    {% set morning_render.index = morning_render.index + 1 %}
+                    {% set action_key = matched.item.key %}
+                    <article class="routine-slide{% if morning_render.index != 1 %} is-hidden{% endif %}" data-routine-slide>
+                        <div class="routine-step-visual">
+                            {{ routine_action_svg(action_key) }}
+                        </div>
+                        <div class="routine-step-copy">
+                            <span>STEP {{ morning_render.index }}</span>
+                            <strong>{{ matched.item.display_name }}</strong>
+                            <p class="routine-step-text">{{ step }}</p>
+                        </div>
+                    </article>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="routine-stepper-controls">
+                    <button type="button" class="routine-nav-button" data-routine-prev aria-label="이전 단계">←</button>
+                    <div class="routine-step-dots" aria-hidden="true">
+                        {% for _ in range(morning_steps.count) %}
+                        <span class="{% if loop.first %}is-active{% endif %}"></span>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="routine-nav-button is-next" data-routine-next aria-label="다음 단계">→</button>
+                </div>
             </article>
 
-            <article class="content-card">
+            <article class="content-card routine-stepper" data-routine-carousel>
                 <div class="section-head">
                     <div>
                         <h2>오후 루틴</h2>
                     </div>
+                    <span class="routine-counter">
+                        <b data-routine-current>1</b>
+                        <small>/ {{ evening_steps.count }}</small>
+                    </span>
                 </div>
-                <ol class="routine-list">
+                <div class="routine-slide-frame">
+                    {% set evening_render = namespace(index=0) %}
                     {% for step in result.report.routine.evening %}
-                    <li>{{ step }}</li>
+                    {% set matched = namespace(item=None) %}
+                    {% for item in result.report.product_recommendations %}
+                        {% set product_name = item.name|default("") %}
+                        {% set display_name = item.display_name|default("") %}
+                        {% set product_title = item.recommendation_title|default(display_name|default(product_name)) %}
+                        {% if matched.item is none and ((product_name and product_name in step) or (display_name and display_name in step) or (product_title and product_title in step)) %}
+                            {% set matched.item = item %}
+                        {% endif %}
                     {% endfor %}
-                </ol>
+                    {% if matched.item %}
+                    {% set evening_render.index = evening_render.index + 1 %}
+                    {% set action_key = matched.item.key %}
+                    <article class="routine-slide{% if evening_render.index != 1 %} is-hidden{% endif %}" data-routine-slide>
+                        <div class="routine-step-visual">
+                            {{ routine_action_svg(action_key) }}
+                        </div>
+                        <div class="routine-step-copy">
+                            <span>STEP {{ evening_render.index }}</span>
+                            <strong>{{ matched.item.display_name }}</strong>
+                            <p class="routine-step-text">{{ step }}</p>
+                        </div>
+                    </article>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="routine-stepper-controls">
+                    <button type="button" class="routine-nav-button" data-routine-prev aria-label="이전 단계">←</button>
+                    <div class="routine-step-dots" aria-hidden="true">
+                        {% for _ in range(evening_steps.count) %}
+                        <span class="{% if loop.first %}is-active{% endif %}"></span>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="routine-nav-button is-next" data-routine-next aria-label="다음 단계">→</button>
+                </div>
             </article>
         </section>
 
-        <section class="content-card">
+        <section class="content-card" id="productRecommendations">
             <div class="section-head">
                 <div>
                     <h2>제품 추천</h2>
@@ -126,12 +389,23 @@
             </div>
             <div class="product-grid">
                 {% for item in result.report.product_recommendations %}
-                <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="product-card">
+                <a
+                    href="{{ item.url }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="product-card"
+                    id="product-{{ loop.index }}"
+                    data-product-card
+                    data-product-key="{{ item.key|default('') }}"
+                    data-product-name="{{ item.name|default('') }}"
+                    data-product-display-name="{{ item.display_name|default('') }}"
+                    data-product-title="{{ item.recommendation_title|default(item.display_name|default(item.name)) }}"
+                >
                     <div class="product-image-wrap">
-                        <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                        <img src="{{ item.image_url }}" alt="{{ item.recommendation_title|default(item.display_name|default(item.name)) }}">
                     </div>
                     <div class="product-copy">
-                        <strong>{{ item.name }}</strong>
+                        <strong>{{ item.recommendation_title|default(item.display_name|default(item.name)) }}</strong>
                         <small>{{ item.brand }} · {{ item.price }}</small>
                     </div>
                 </a>
@@ -149,47 +423,6 @@
                 <strong>{{ result.skin_mbti.type_label }}</strong>
                 {{ result.skin_mbti.summary }}
             </p>
-        </section>
-
-        <section class="content-card">
-            <div class="section-head">
-                <div>
-                    <h2>상세 정보</h2>
-                </div>
-            </div>
-            <div class="snapshot-grid report-snapshot-row">
-                <article class="snapshot-card">
-                    <span class="card-label">AI 판정</span>
-                    <strong>{{ display_prediction }}</strong>
-                    <p>원본 라벨: {{ raw_prediction }}</p>
-                </article>
-                <article class="snapshot-card">
-                    <span class="card-label">피부 타입</span>
-                    <strong>{{ result.skin_mbti.type_label }}</strong>
-                    <p>설문 응답을 바탕으로 정리한 피부 성향입니다.</p>
-                </article>
-                <article class="snapshot-card photo-card">
-                    <span class="card-label">업로드 사진</span>
-                    {% if result.uploaded_preview %}
-                    <img src="{{ result.uploaded_preview }}" alt="업로드한 피부 분석 사진">
-                    {% else %}
-                    <p>사진 미리보기를 불러오지 못했습니다.</p>
-                    {% endif %}
-                </article>
-            </div>
-
-            <div class="metric-grid detail-grid">
-                {% for card in result.report.condition_cards %}
-                <article class="metric-card">
-                    <div class="metric-top">
-                        <strong>{{ card.label }}</strong>
-                        <span>{{ card.level }}</span>
-                    </div>
-                    <div class="metric-value">{{ card.score }}</div>
-                    <small>{{ card.focus_area }}</small>
-                </article>
-                {% endfor %}
-            </div>
         </section>
 
         <section class="content-card">

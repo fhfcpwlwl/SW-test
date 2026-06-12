@@ -11,8 +11,9 @@ logs/
 uploads/
 static/uploads/
 
-model/
-*.h5
+model/*.h5
+model/*.pt
+model/*.onnx
 
 data/images/
 data/labels.csv

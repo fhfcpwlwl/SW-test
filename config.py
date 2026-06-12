@@ -20,6 +20,8 @@ for directory in [MODEL_DIR, UPLOAD_DIR, DATA_DIR, IMAGE_DIR, LOGS_DIR]:
 
 MODEL_PATH = MODEL_DIR / "skin_model.h5"
 
+os.environ.setdefault("PYTORCH_MODEL_LABELS", "acne,normal")
+
 
 def _default_pytorch_model_path() -> Path:
     """Resolve a sensible default location for the external .pth file."""
@@ -29,9 +31,11 @@ def _default_pytorch_model_path() -> Path:
 
     home = Path.home()
     candidates = [
+        MODEL_DIR / "skin_model_best.pth",
         home / "OneDrive" / "Desktop" / "skin_model_best.pth",
         home / "OneDrive" / "바탕 화면" / "skin_model_best.pth",
         home / "Desktop" / "skin_model_best.pth",
+        home / "Downloads" / "skin_model_best.pth",
     ]
     for candidate in candidates:
         if candidate.exists():

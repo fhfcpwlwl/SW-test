@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Skin analysis helpers for the web app."""
 from typing import Any, Dict, List
 
@@ -230,7 +232,7 @@ def _classify_answer_group(form: dict, key: str, a_label: str, a_name: str, b_la
     count_a = sum(1 for value in answers if value == "A")
     count_b = sum(1 for value in answers if value == "B")
     if count_a == 0 and count_b == 0:
-        return {"code": "?", "label": "Unknown"}
+        return {"code": "?", "label": "확인 필요"}
     if count_a >= count_b:
         return {"code": a_label, "label": a_name}
     return {"code": b_label, "label": b_name}
@@ -381,9 +383,30 @@ def build_condition_cards(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     ]
 
 
+PRODUCT_DISPLAY_NAMES = {
+    "cleanser": "클렌징 젤",
+    "soothing_toner": "진정 토너",
+    "moisture_ampoule": "수분 앰플",
+    "soothing_cream": "보습 크림",
+    "blemish_cream": "트러블 젤 크림",
+    "retinol": "레티놀 크림",
+    "sunscreen": "선크림",
+}
+
+
+def _product_display_name(product: Dict[str, str]) -> str:
+    """Return the user-facing product category name."""
+    return product.get("display_name") or PRODUCT_DISPLAY_NAMES.get(product.get("key", ""), "추천 제품")
+
+
 def _copy_product(key: str) -> Dict[str, str]:
     """Return a copy of an official product definition."""
-    return dict(PRODUCTS[key])
+    product = dict(PRODUCTS[key])
+    display_name = PRODUCT_DISPLAY_NAMES.get(key, product["name"])
+    product["official_name"] = product["name"]
+    product["display_name"] = display_name
+    product["recommendation_title"] = f"{display_name} 추천"
+    return product
 
 
 def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, Any]) -> List[Dict[str, str]]:
@@ -427,33 +450,34 @@ def build_product_recommendations(metrics: Dict[str, Any], skin_mbti: Dict[str, 
 def build_routine(metrics: Dict[str, Any], skin_mbti: Dict[str, Any], products: List[Dict[str, str]]) -> Dict[str, List[str]]:
     """Build a routine that references only official Hyafilia USA products."""
     product_map = {product["key"]: product for product in products}
+    product_label = {key: _product_display_name(product) for key, product in product_map.items()}
 
     morning = [
-        f"세안은 {product_map['cleanser']['name']}로 가볍게 시작합니다.",
-        f"피부 결 정돈은 {product_map['soothing_toner']['name']}로 진행합니다.",
+        f"세안은 {product_label['cleanser']}로 가볍게 시작합니다.",
+        f"피부 결 정돈은 {product_label['soothing_toner']}로 진행합니다.",
     ]
 
     evening = [
-        f"저녁 세안은 {product_map['cleanser']['name']}로 부드럽게 마무리합니다.",
-        f"세안 후 {product_map['soothing_toner']['name']}로 피부를 진정시키고 다음 단계를 준비합니다.",
+        f"저녁 세안은 {product_label['cleanser']}로 부드럽게 마무리합니다.",
+        f"세안 후 {product_label['soothing_toner']}로 피부를 진정시키고 다음 단계를 준비합니다.",
     ]
 
     if "moisture_ampoule" in product_map:
-        morning.append(f"수분 보충이 필요하면 {product_map['moisture_ampoule']['name']}를 얇게 레이어링합니다.")
-        evening.append(f"건조함이 느껴지는 날에는 {product_map['moisture_ampoule']['name']}를 충분히 사용합니다.")
+        morning.append(f"수분 보충이 필요하면 {product_label['moisture_ampoule']}을 얇게 레이어링합니다.")
+        evening.append(f"건조함이 느껴지는 날에는 {product_label['moisture_ampoule']}을 충분히 사용합니다.")
 
     if "blemish_cream" in product_map:
-        morning.append(f"트러블 관리가 필요한 부위에는 {product_map['blemish_cream']['name']}를 소량 사용합니다.")
-        evening.append(f"트러블 진정 단계로 {product_map['blemish_cream']['name']}를 집중 사용합니다.")
+        morning.append(f"트러블 관리가 필요한 부위에는 {product_label['blemish_cream']}을 소량 사용합니다.")
+        evening.append(f"트러블 진정 단계로 {product_label['blemish_cream']}을 집중 사용합니다.")
 
     if "retinol" in product_map:
-        evening.append(f"탄력과 결 케어를 위해 밤에는 {product_map['retinol']['name']}를 소량 사용합니다.")
+        evening.append(f"탄력과 결 케어를 위해 밤에는 {product_label['retinol']}을 소량 사용합니다.")
 
     if "soothing_cream" in product_map:
-        evening.append(f"마지막 보습막은 {product_map['soothing_cream']['name']}로 정리합니다.")
-        morning.append(f"건조하거나 예민한 날 아침에는 {product_map['soothing_cream']['name']}를 얇게 덧발라 줍니다.")
+        evening.append(f"마지막 보습막은 {product_label['soothing_cream']}으로 정리합니다.")
+        morning.append(f"건조하거나 예민한 날 아침에는 {product_label['soothing_cream']}을 얇게 덧발라 줍니다.")
 
-    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+    morning.append(f"외출 전에는 {product_label['sunscreen']}으로 자외선 차단을 마무리합니다.")
 
     return {"morning": morning[:5], "evening": evening[:5]}
 
@@ -596,32 +620,33 @@ def build_pytorch_routine(
     acne_count = int(analysis.get("acne_count", 0) or 0)
     severity_ratio = float(analysis.get("severity_ratio", 0) or 0)
     acne_signal = prediction_route == "acne" or acne_count > 0 or severity_ratio >= 0.2
+    product_label = {key: _product_display_name(product) for key, product in product_map.items()}
 
     morning = [
-        f"{product_map['cleanser']['name']}로 세안을 시작합니다.",
-        f"{product_map['soothing_toner']['name']}로 피부 결을 정돈합니다.",
+        f"{product_label['cleanser']}로 세안을 시작합니다.",
+        f"{product_label['soothing_toner']}로 피부 결을 정돈합니다.",
     ]
     evening = [
-        f"{product_map['cleanser']['name']}로 메이크업과 노폐물을 정리합니다.",
-        f"{product_map['soothing_toner']['name']}로 피부를 편안하게 진정시킵니다.",
+        f"{product_label['cleanser']}로 메이크업과 노폐물을 정리합니다.",
+        f"{product_label['soothing_toner']}로 피부를 편안하게 진정시킵니다.",
     ]
 
     if "moisture_ampoule" in product_map:
-        morning.append(f"{product_map['moisture_ampoule']['name']}로 수분을 채워줍니다.")
-        evening.append(f"{product_map['moisture_ampoule']['name']}를 충분히 레이어링합니다.")
+        morning.append(f"{product_label['moisture_ampoule']}로 수분을 채워줍니다.")
+        evening.append(f"{product_label['moisture_ampoule']}을 충분히 레이어링합니다.")
 
     if acne_signal and "blemish_cream" in product_map:
-        morning.append(f"AI가 {predicted_class} 경향을 감지해 트러블 부위에는 {product_map['blemish_cream']['name']}를 소량만 사용합니다.")
+        morning.append(f"AI가 {predicted_class} 경향을 감지해 트러블 부위에는 {product_label['blemish_cream']}을 소량만 사용합니다.")
 
     if "blemish_cream" in product_map:
-        evening.append(f"트러블 부위에는 {product_map['blemish_cream']['name']}를 가볍게 사용합니다.")
+        evening.append(f"트러블 부위에는 {product_label['blemish_cream']}을 가볍게 사용합니다.")
 
     if "retinol" in product_map:
-        evening.append(f"탄력 관리가 필요할 때 {product_map['retinol']['name']}를 밤 루틴에 추가합니다.")
+        evening.append(f"탄력 관리가 필요할 때 {product_label['retinol']}을 밤 루틴에 추가합니다.")
 
     if "soothing_cream" in product_map:
-        morning.append(f"건조함이 느껴지면 {product_map['soothing_cream']['name']}로 마무리합니다.")
-        evening.append(f"{product_map['soothing_cream']['name']}로 보습막을 마무리합니다.")
+        morning.append(f"건조함이 느껴지면 {product_label['soothing_cream']}으로 마무리합니다.")
+        evening.append(f"{product_label['soothing_cream']}으로 보습막을 마무리합니다.")
 
     if confidence < 60:
         morning.append("AI 신뢰도가 낮은 편이므로 오늘은 자극적인 기능성 제품보다 진정과 보습 위주로 단순하게 유지합니다.")
@@ -633,7 +658,7 @@ def build_pytorch_routine(
         morning.append("AI가 안정적인 피부 상태로 판단했으므로 아침 루틴은 가볍게 유지합니다.")
         evening.append("안정적인 상태를 유지할 수 있게 밤에는 세안과 보습을 과하게 늘리지 않습니다.")
 
-    morning.append(f"외출 전에는 {product_map['sunscreen']['name']}로 자외선 차단을 마무리합니다.")
+    morning.append(f"외출 전에는 {product_label['sunscreen']}으로 자외선 차단을 마무리합니다.")
 
     routine_steps: List[Dict[str, str]] = [
         {
