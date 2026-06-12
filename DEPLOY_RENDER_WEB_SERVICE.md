@@ -6,7 +6,7 @@ Blueprint가 아니라 Web Service로 배포해도 됩니다. 이 저장소는 W
 
 - 배포용 실행 파일: `deploy_app.py`
 - 운영 서버 실행 패키지: `gunicorn`
-- Python 버전 고정: `runtime.txt`
+- Python 버전 고정: `.python-version`
 - AI 모델 파일: `model/skin_model_best.pth`
 - 실행 명령 예시: `Procfile`
 
@@ -26,13 +26,14 @@ Instance Type: Free
 환경변수는 아래 값만 추가하면 됩니다.
 
 ```text
+PYTHON_VERSION=3.11.9
 PYTORCH_MODEL_PATH=model/skin_model_best.pth
 PYTORCH_MODEL_LABELS=acne,normal
 FLASK_DEBUG=False
 LOG_LEVEL=INFO
 ```
 
-`runtime.txt`가 있으므로 `PYTHON_VERSION` 환경변수는 따로 넣지 않아도 됩니다.
+`.python-version`도 추가해두었지만, Render 설정 화면에도 `PYTHON_VERSION=3.11.9`를 넣어두면 가장 확실합니다.
 
 ## 배포 후 확인
 
