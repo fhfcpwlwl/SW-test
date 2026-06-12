@@ -17,6 +17,7 @@ try:
     from torchvision import models, transforms
 
     TORCH_AVAILABLE = True
+    torch.set_num_threads(1)
 except ImportError:
     torch = None
     F = None
@@ -136,7 +137,12 @@ def load_pytorch_model(
     return {"model": model, "labels": inferred_labels, "path": str(path)}
 
 
-def predict_pytorch_skin_model(image_path: str, bundle: Optional[dict] = None) -> Optional[dict]:
+def predict_pytorch_skin_model(
+    image_path: str,
+    bundle: Optional[dict] = None,
+    use_tta: bool = True,
+    use_advanced_score: bool = True,
+) -> Optional[dict]:
     """Run inference with the external .pth model and return class/confidence data."""
     if not TORCH_AVAILABLE:
         logger.warning("PyTorch is not installed. Skipping .pth model inference.")
@@ -181,12 +187,15 @@ def predict_pytorch_skin_model(image_path: str, bundle: Optional[dict] = None) -
                 }
 
             tensor = preprocess(image).unsqueeze(0)
-            flipped_tensor = preprocess(image.transpose(Image.FLIP_LEFT_RIGHT)).unsqueeze(0)
+            flipped_tensor = preprocess(image.transpose(Image.FLIP_LEFT_RIGHT)).unsqueeze(0) if use_tta else None
 
         with torch.inference_mode():
             logits = model(tensor)
-            flipped_logits = model(flipped_tensor)
-            probabilities = ((F.softmax(logits, dim=1)[0] + F.softmax(flipped_logits, dim=1)[0]) / 2).cpu().numpy()
+            probabilities_tensor = F.softmax(logits, dim=1)[0]
+            if flipped_tensor is not None:
+                flipped_logits = model(flipped_tensor)
+                probabilities_tensor = (probabilities_tensor + F.softmax(flipped_logits, dim=1)[0]) / 2
+            probabilities = probabilities_tensor.cpu().numpy()
 
         predicted_index = int(np.argmax(probabilities))
         predicted_label = labels[predicted_index] if predicted_index < len(labels) else f"class_{predicted_index}"
@@ -200,8 +209,15 @@ def predict_pytorch_skin_model(image_path: str, bundle: Optional[dict] = None) -
                 "acne_count": 0,
                 "severity_ratio": 0.0,
             }
-        elif prediction_route == "acne":
+        elif prediction_route == "acne" and use_advanced_score:
             score_payload = calculate_advanced_skin_score(image_bytes)
+        elif prediction_route == "acne":
+            normalized_confidence = max(0.0, min(1.0, confidence / 100))
+            score_payload = {
+                "skin_score": int(80 - (normalized_confidence * 35)),
+                "acne_count": 0,
+                "severity_ratio": round(normalized_confidence * 10, 2),
+            }
         else:
             score_payload = {
                 "skin_score": round(confidence),

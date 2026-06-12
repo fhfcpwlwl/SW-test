@@ -1,6 +1,7 @@
 """Single-process Flask app for cloud deployment."""
 import base64
 import io
+import time
 from pathlib import Path
 
 from flask import Flask, jsonify, make_response, render_template, request
@@ -10,7 +11,7 @@ from app import DEFAULT_RESULT, merge_result_data
 from config import PYTORCH_MODEL_ENABLED, PYTORCH_MODEL_PATH, UPLOAD_DIR
 from logger import setup_logger
 from pytorch_report import build_pytorch_personalized_report
-from skin_analyzer import build_pytorch_advice, ensure_face_image, parse_skin_mbti
+from skin_analyzer import build_pytorch_advice, parse_skin_mbti
 from torch_skin_model import load_pytorch_model, predict_pytorch_skin_model
 from utils import clean_analysis_result, create_safe_filename, validate_file_upload
 
@@ -35,10 +36,10 @@ def normalize_upload_for_analysis(file_bytes: bytes) -> bytes:
     """Convert browser uploads to a compact RGB JPEG for stable cloud inference."""
     with Image.open(io.BytesIO(file_bytes)) as image:
         image = image.convert("RGB")
-        image.thumbnail((1280, 1280))
+        image.thumbnail((640, 640))
 
         output = io.BytesIO()
-        image.save(output, format="JPEG", quality=92, optimize=True)
+        image.save(output, format="JPEG", quality=85, optimize=True)
         return output.getvalue()
 
 
@@ -80,6 +81,7 @@ def analyze_get():
 def analyze():
     """Analyze an uploaded photo without requiring a separate backend process."""
     saved_file_path = None
+    started_at = time.perf_counter()
     try:
         if pytorch_model_bundle is None:
             logger.error("PyTorch model is not loaded")
@@ -95,28 +97,24 @@ def analyze():
 
         file_bytes = file.read()
         mime_type = file.mimetype or "image/jpeg"
-        preview_data = base64.b64encode(file_bytes).decode("utf-8")
-        preview_url = f"data:{mime_type};base64,{preview_data}"
-
         is_valid, error_msg = validate_file_upload(file.filename, len(file_bytes))
         if not is_valid:
             logger.warning("Invalid file upload: %s", error_msg)
             return render_template("index.html", error=error_msg), 400
 
         analysis_bytes = normalize_upload_for_analysis(file_bytes)
+        preview_data = base64.b64encode(analysis_bytes).decode("utf-8")
+        preview_url = f"data:image/jpeg;base64,{preview_data}"
         saved_file_path = UPLOAD_DIR / create_safe_filename(f"{Path(file.filename).stem}.jpg")
         saved_file_path.write_bytes(analysis_bytes)
         logger.info("Saved upload: %s", saved_file_path)
-
-        try:
-            ensure_face_image(str(saved_file_path))
-        except ValueError as exc:
-            logger.warning("Face validation warning, continuing for demo: %s", exc)
 
         logger.info("Starting PyTorch prediction")
         pytorch_result = predict_pytorch_skin_model(
             str(saved_file_path),
             bundle=pytorch_model_bundle,
+            use_tta=False,
+            use_advanced_score=False,
         )
         if not pytorch_result or not isinstance(pytorch_result.get("analysis"), dict):
             raise RuntimeError("PyTorch prediction did not return a valid analysis payload.")
@@ -140,6 +138,7 @@ def analyze():
         }
 
         rendered_result = merge_result_data(DEFAULT_RESULT, clean_analysis_result(result))
+        logger.info("Analysis request completed in %.2fs", time.perf_counter() - started_at)
         return render_template("result.html", result=rendered_result), 200
 
     except ValueError as exc:
