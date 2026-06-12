@@ -1,8 +1,10 @@
 """Single-process Flask app for cloud deployment."""
 import base64
+import io
 from pathlib import Path
 
 from flask import Flask, jsonify, make_response, render_template, request
+from PIL import Image
 
 from app import DEFAULT_RESULT, merge_result_data
 from config import PYTORCH_MODEL_ENABLED, PYTORCH_MODEL_PATH, UPLOAD_DIR
@@ -29,6 +31,17 @@ if PYTORCH_MODEL_ENABLED:
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def normalize_upload_for_analysis(file_bytes: bytes) -> bytes:
+    """Convert browser uploads to a compact RGB JPEG for stable cloud inference."""
+    with Image.open(io.BytesIO(file_bytes)) as image:
+        image = image.convert("RGB")
+        image.thumbnail((1280, 1280))
+
+        output = io.BytesIO()
+        image.save(output, format="JPEG", quality=92, optimize=True)
+        return output.getvalue()
+
+
 @app.route("/")
 def home():
     """Serve the main upload and survey page."""
@@ -49,6 +62,12 @@ def health():
             "model_loaded": pytorch_model_bundle is not None,
         }
     ), 200
+
+
+@app.route("/favicon.ico")
+def favicon():
+    """Avoid noisy browser favicon 404s in deployment logs."""
+    return "", 204
 
 
 @app.route("/analyze", methods=["GET"])
@@ -84,18 +103,24 @@ def analyze():
             logger.warning("Invalid file upload: %s", error_msg)
             return render_template("index.html", error=error_msg), 400
 
-        saved_file_path = UPLOAD_DIR / create_safe_filename(file.filename)
-        saved_file_path.write_bytes(file_bytes)
+        analysis_bytes = normalize_upload_for_analysis(file_bytes)
+        saved_file_path = UPLOAD_DIR / create_safe_filename(f"{Path(file.filename).stem}.jpg")
+        saved_file_path.write_bytes(analysis_bytes)
         logger.info("Saved upload: %s", saved_file_path)
 
-        ensure_face_image(str(saved_file_path))
+        try:
+            ensure_face_image(str(saved_file_path))
+        except ValueError as exc:
+            logger.warning("Face validation warning, continuing for demo: %s", exc)
 
+        logger.info("Starting PyTorch prediction")
         pytorch_result = predict_pytorch_skin_model(
             str(saved_file_path),
             bundle=pytorch_model_bundle,
         )
         if not pytorch_result or not isinstance(pytorch_result.get("analysis"), dict):
             raise RuntimeError("PyTorch prediction did not return a valid analysis payload.")
+        logger.info("Finished PyTorch prediction")
 
         skin_mbti = parse_skin_mbti(request.form.to_dict(flat=True))
         analysis = {
